@@ -50,25 +50,11 @@ local Tab = Window:Tab({
     Locked = false,
 })
 
-game.Players.LocalPlayer.Character.Humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
-    if _env.NoStun == true and game.Players.LocalPlayer.Character.Humanoid.WalkSpeed < 16 then
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
-    end
-end)
-
-game.Players.LocalPlayer.CharacterAdded:Connect(function()
-    game.Players.LocalPlayer.Character.Humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
-        if _env.NoStun == true and game.Players.LocalPlayer.Character.Humanoid.WalkSpeed < 16 then
-            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
-        end
-    end)
-end)
-
 local Toggle = Tab:Toggle({
     Title = "取消前后摇",
     Desc = "FIN",
     Locked = false,
     Callback = function(state)
-        _env.NoStun = v
+        _env.NoStun = state
   end
 })
