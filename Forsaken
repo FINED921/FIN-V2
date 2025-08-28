@@ -60,7 +60,7 @@ local Slider = Tab:Slider({
 })
 
 local Toggle = Tab:Toggle({
-    Title = "局内聊天框",
+    Title = "显示局内聊天框",
     Desc = "FIN",
     Locked = false,
     Callback = function(state)
@@ -72,6 +72,57 @@ local Tab = Window:Tab({
     Title = "体力消耗",
     Icon = "drama",
     Locked = false,
+})
+
+-- 获取游戏体力模块
+local SprintingModule = ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting")
+local GetModule = function() return require(SprintingModule) end
+
+-- 实时更新体力设置
+task.spawn(function()
+    while true do
+        local m = GetModule()
+        for key, value in pairs(StaminaSettings) do
+            if SettingToggles[key] then
+                m[key] = value
+            end
+        end
+        task.wait(0.5)
+    end
+end)
+
+-- 无限体力功能
+local bai = {Spr = false}
+local connection
+
+local Toggle = Tab:Toggle({
+    Title = "无限体力",
+    Desc = "FIN",
+    Locked = false,
+    Callback = function(state)
+        bai.Spr = state
+        local Sprinting = GetModule()
+
+        if state then
+            Sprinting.StaminaLoss = 0
+            Sprinting.StaminaGain = StaminaSettings.InfiniteGain or 9999
+
+            if connection then connection:Disconnect() end
+            connection = RunService.Heartbeat:Connect(function()
+                if not bai.Spr then return end
+                Sprinting.StaminaLoss = 0
+                Sprinting.StaminaGain = StaminaSettings.InfiniteGain or 9999
+            end)
+        else
+            Sprinting.StaminaLoss = StaminaSettings.StaminaLoss or 10
+            Sprinting.StaminaGain = StaminaSettings.StaminaGain or 25
+
+            if connection then
+                connection:Disconnect()
+                connection = nil
+            end
+        end
+    end
 })
 
 local Tab = Window:Tab({
