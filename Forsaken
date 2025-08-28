@@ -49,6 +49,18 @@ local Tab = Window:Tab({
     Locked = false,
 })
 
+local Slider = Tab:Slider({
+    Text = "速度调节",
+    Min = 0, Max = 3,
+    Default = 1, Compact = true,
+    Rounding = 1,
+    Callback = function(v)
+        _env.SpeedBoostValue = v
+    end
+})
+
+_env.SpeedBoostValue = 1
+
 local Toggle = Tab:Toggle({
     Title = "开启局内聊天框",
     Desc = "FIN",
