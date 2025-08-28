@@ -250,9 +250,113 @@ local Toggle4 = Tab3:Toggle({
     end
 })
 
+local Toggle5 = Tab3:Toggle({
+        Title = "自动互动医疗包",
+        Desc = "不关上无法丢弃💀",
+        Locked = false,
+        Callback = function(state)
+       autoMedkitEnabled = state
+        
+        if autoMedkitEnabled then
+            medkitThread = task.spawn(function()
+                while autoMedkitEnabled and task.wait(0.5) do
+                    local medkit = workspace:FindFirstChild("Map", true)
+                    if medkit then
+                        medkit = medkit:FindFirstChild("Ingame", true)
+                        if medkit then
+                            medkit = medkit:FindFirstChild("Medkit", true)
+                            if medkit then
+                                local itemRoot = medkit:FindFirstChild("ItemRoot", true)
+                                if itemRoot then
+                                    local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
+                                    if prompt then
+                                        fireproximityprompt(prompt)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        elseif medkitThread then
+            task.cancel(medkitThread)
+            medkitThread = nil
+        end
+    end
+})
+
+local Toggle6 = Tab3:Toggle({
+        Title = "自动互动可乐罐",
+        Desc = "不关上无法丢弃💀",
+        Locked = false,
+        Callback = function(state)
+        autoColaEnabled = state
+        
+        if autoColaEnabled then
+            colaThread = task.spawn(function()
+                while autoColaEnabled and task.wait(0.5) do
+                    local cola = workspace:FindFirstChild("Map", true)
+                    if cola then
+                        cola = cola:FindFirstChild("Ingame", true)
+                        if cola then
+                            cola = cola:FindFirstChild("BloxyCola", true)
+                            if cola then
+                                local itemRoot = cola:FindFirstChild("ItemRoot", true)
+                                if itemRoot then
+                                    local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
+                                    if prompt then
+                                        fireproximityprompt(prompt)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        elseif colaThread then
+            task.cancel(colaThread)
+            colaThread = nil
+        end
+    end
+})
+
     local Tab4 = Window:Tab({
-        Title = "修机",
+        Title = "修发动机",
         Icon = "drama",
         Locked = false,
-    })
-end
+})
+
+local Toggle7 = Tab4:Toggle({
+        Title = "自动修机",
+        Desc = "FIN",
+        Locked = false,
+        Callback = function(state)
+        _G.BTE = state
+
+        local function RepairGenerators()
+            local map = workspace:FindFirstChild("Map")
+            local ingame = map and map:FindFirstChild("Ingame")
+            local currentMap = ingame and ingame:FindFirstChild("Map")
+
+            if currentMap then
+                for _, obj in ipairs(currentMap:GetChildren()) do
+                    if obj.Name == "Generator" and obj:FindFirstChild("Progress") and obj.Progress.Value < 100 then
+                        local remote = obj:FindFirstChild("Remotes") and obj.Remotes:FindFirstChild("RE")
+                        if remote then
+                            remote:FireServer()
+                        end
+                    end
+                end
+            end
+        end
+
+        if state then
+            task.spawn(function()
+                while _G.BTE do
+                    RepairGenerators()
+                    task.wait(_G.REP or 1.80) 
+                end
+            end)
+        end
+    end
+})
