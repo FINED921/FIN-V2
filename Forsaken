@@ -157,21 +157,18 @@ function createMainWindow()
     })
 
     local Slider = Tab2:Slider({
-        Title = "最大体力值",
+        Title = T("最大体力值"),
+        Step = 1,
+        Value = {
         Min = 100,
-        Max = 800,
-        Default = getDefaultWalkSpeed(), 
-        Callback = function(Speed)
-            local player = game.Players.LocalPlayer
-            local character = player.Character
-            if character then
-                local humanoid = character:FindFirstChild("Humanoid")
-                if humanoid then
-                    
-                    humanoid.WalkSpeed = Speed
-                end
-            end
-        end
+        Max = 1000,
+        Default = 100,
+   },
+          Callback = function(value)
+                        task.spawn(function()
+                        Sprinting.MaxStamina = value
+            end)           
+         end        
     })
 
     local Tab3 = Window:Tab({
