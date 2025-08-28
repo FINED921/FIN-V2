@@ -158,7 +158,7 @@ local Tab3 = Window:Tab({
         Locked = false,
     })
 
-local Toggle = Tab:Toggle({
+local Toggle3 = Tab3:Toggle({
         Title = "医疗包传送且获取",
         Desc = "FIN",
         Locked = false,
@@ -204,7 +204,7 @@ local Toggle = Tab:Toggle({
     end
 })
 
-local Toggle = Tab:Toggle({
+local Toggle4 = Tab3:Toggle({
         Title = "可乐罐传送且获取",
         Desc = "FIN",
         Locked = false,
