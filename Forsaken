@@ -44,6 +44,12 @@ Window:EditOpenButton({
     Draggable = true,
 })
 
+local Tab = Window:Tab({
+    Title = "基础功能",
+    Icon = "drama",
+    Locked = false,
+})
+
 local Toggle = Tab:Toggle({
     Title = "去除前后摇",
     Desc = "FIN",
@@ -52,4 +58,3 @@ local Toggle = Tab:Toggle({
         _env.NoStun = v
     end
 })
-
