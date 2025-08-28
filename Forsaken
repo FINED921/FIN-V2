@@ -45,7 +45,7 @@ Window:EditOpenButton({
 })
 
 local Tab = Window:Tab({
-    Title = "自动搜集",
+    Title = 基础功能",
     Icon = "zap",
     Locked = false,
 })
