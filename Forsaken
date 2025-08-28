@@ -8,8 +8,9 @@ WindUI:Notify({
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character
-local hum = Character.HumanoidRootPart
+
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local hum = Character:WaitForChild("HumanoidRootPart")
 local PlayerGui = LocalPlayer.PlayerGui
 
 local Window = WindUI:CreateWindow({
@@ -27,9 +28,7 @@ local Window = WindUI:CreateWindow({
         Anonymous = false
     },
     SideBarWidth = 200,
-    -- HideSearchBar = true,
     ScrollBarEnabled = true,
-    -- Background = "rbxassetid://13511292247", -- rbxassetid only
 })
 
 Window:EditOpenButton({
@@ -54,11 +53,7 @@ local Toggle = Tab:Toggle({
     Title = "开启局内聊天框",
     Desc = "FIN",
     Locked = false,
-    Callback = function()
-        if state then
-    game.TextChatService.ChatWindowConfiguration.Enabled = true
-    else
-    game.TextChatService.ChatWindowConfiguration.Enabled = false    
-    end
+    Callback = function(state)
+        game.TextChatService.ChatWindowConfiguration.Enabled = state
     end
 })
