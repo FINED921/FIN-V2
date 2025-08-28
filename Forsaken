@@ -62,6 +62,18 @@ local Slider = Tab:Slider({
 _env.SpeedBoostValue = 1
 
 local Toggle = Tab:Toggle({
+    Text = "启用速度",
+    Callback = function(v)
+        _env.SpeedBoost = v
+        while _env.SpeedBoost do
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame += game.Players.LocalPlayer.Character.Humanoid.MoveDirection * _env.SpeedBoostValue
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = true
+            task.wait()
+        end
+    end
+})
+
+local Toggle2 = Tab:Toggle({
     Title = "开启局内聊天框",
     Desc = "FIN",
     Locked = false,
