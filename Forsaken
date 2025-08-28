@@ -51,10 +51,10 @@ local Tab = Window:Tab({
 })
 
 local Toggle = Tab:Toggle({
-    Title = "去除前后摇",
+    Title = "取消前后摇",
     Desc = "FIN",
     Locked = false,
-    Callback = function(v)
+    Callback = function(state)
         _env.NoStun = v
-    end
+  end
 })
