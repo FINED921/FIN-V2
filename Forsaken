@@ -320,11 +320,11 @@ local Toggle6 = Tab3:Toggle({
     end
 })
 
-    local Tab4 = Window:Tab({
+local Tab4 = Window:Tab({
         Title = "修发动机",
-        Icon = "drama",
+        Icon = "zap",
         Locked = false,
-})
+    })
 
 local Toggle7 = Tab4:Toggle({
         Title = "自动修机",
