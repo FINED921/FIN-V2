@@ -51,10 +51,14 @@ local Tab = Window:Tab({
 })
 
 local Toggle = Tab:Toggle({
-    Title = "取消前后摇",
+    Title = "开启局内聊天框",
     Desc = "FIN",
     Locked = false,
-    Callback = function(state)
-        _env.NoStun = state
-  end
+    Callback = function()
+        if state then
+    game.TextChatService.ChatWindowConfiguration.Enabled = true
+    else
+    game.TextChatService.ChatWindowConfiguration.Enabled = false    
+    end
+    end
 })
