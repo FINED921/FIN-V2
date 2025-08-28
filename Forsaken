@@ -50,34 +50,26 @@ local Tab = Window:Tab({
 })
 
 local Slider = Tab:Slider({
-    Text = "速度调节",
-    Min = 0, Max = 3,
-    Default = 1, Compact = true,
-    Rounding = 1,
-    Callback = function(v)
-        _env.SpeedBoostValue = v
-    end
+    Title = "步行速度",
+    Min = 16,
+    Max = 400,
+    Default = game.Players.LocalPlayer.Character.Humanoid.WalkSpeed,
+    Callback = function(Speed)
+       game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Speed
+   end
 })
-
-_env.SpeedBoostValue = 1
 
 local Toggle = Tab:Toggle({
-    Text = "启用速度",
-    Callback = function(v)
-        _env.SpeedBoost = v
-        while _env.SpeedBoost do
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame += game.Players.LocalPlayer.Character.Humanoid.MoveDirection * _env.SpeedBoostValue
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = true
-            task.wait()
-        end
-    end
-})
-
-local Toggle2 = Tab:Toggle({
-    Title = "开启局内聊天框",
+    Title = "局内聊天框",
     Desc = "FIN",
     Locked = false,
     Callback = function(state)
         game.TextChatService.ChatWindowConfiguration.Enabled = state
     end
+})
+
+local Tab = Window:Tab({
+    Title = "体力消耗",
+    Icon = "drama",
+    Locked = false,
 })
