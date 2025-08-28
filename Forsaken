@@ -52,9 +52,9 @@ local Tab = Window:Tab({
 
 local Slider = Tab:Slider({
     Title = "速度调节",
-    Min = 0
-    Max = 3
-    Callback = function()
-    _env.SpeedBoostValue = v
+    Min = 0,
+    Max = 3,
+    Callback = function(value)
+        _env.SpeedBoostValue = value
     end
 })
