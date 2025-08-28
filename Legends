@@ -1,0 +1,442 @@
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
+WindUI:Notify({
+    Title = "FIN | 极速启动中",
+    Content = "尊贵的FIN用户 欢迎使用FIN脚本",
+    Duration = 5,
+})
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character
+local hum = Character.HumanoidRootPart
+local PlayerGui = LocalPlayer.PlayerGui
+
+local Window = WindUI:CreateWindow({
+    Title = "FIN | 极速",
+    Icon = "rbxassetid://129260712070622",
+    IconThemed = true,
+    Author = "作者:鑫晴",
+    Folder = "CloudHub",
+    Size = UDim2.fromOffset(300, 270),
+    Transparent = true,
+    Theme = "Dark",
+    User = {
+        Enabled = true,
+        Callback = function() print("clicked") end,
+        Anonymous = false
+    },
+    SideBarWidth = 200,
+    -- HideSearchBar = true,
+    ScrollBarEnabled = true,
+    -- Background = "rbxassetid://13511292247", -- rbxassetid only
+})
+
+Window:EditOpenButton({
+    Title = "FIN | 极速",
+    Icon = "star",
+    CornerRadius = UDim.new(0,16),
+    StrokeThickness = 2,
+    Color = ColorSequence.new(
+        Color3.fromHex("FF0F7B"), 
+        Color3.fromHex("F89B29")
+    ),
+    Draggable = true,
+})
+
+local Tab = Window:Tab({
+    Title = "自动搜集",
+    Icon = "zap",
+    Locked = false,
+})
+
+local Button = Tab:Button({
+    Title = "防挂机",
+    Desc = "一个防挂机",
+    Locked = false,
+    Callback = function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ChinaQY/Scripts/Main/AntiFling.lua"))()
+WindUI:Notify({
+    Title = "防挂机开启成功",
+    Content = "不知道也没有用",
+    Duration = 3,
+})
+  end
+})
+
+local Toggle = Tab:Toggle({
+    Title = "自动搜集红球",
+    Desc = "FIN",
+    Locked = false,
+    Callback = function(state)
+        autoCollectRedOrb = state
+        
+        if autoCollectRedOrb then
+            if not Character or not hum then
+                waitForCharacter()
+            end
+            
+            redOrbConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local args = {"collectOrb", "Red Orb", "City"}
+                game:GetService("ReplicatedStorage").rEvents.orbEvent:FireServer(unpack(args))
+            end)
+        else
+            if redOrbConnection then
+                redOrbConnection:Disconnect()
+                redOrbConnection = nil
+            end
+        end
+    end
+})
+
+local Toggle2 = Tab:Toggle({
+    Title = "自动搜集蓝球",
+    Desc = "FIN",
+    Locked = false,
+    Callback = function(state)
+        local autoCollectBlueOrb = state
+        
+        if autoCollectBlueOrb then
+            if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                Character = waitForCharacter()
+                hum = Character:WaitForChild("HumanoidRootPart")
+            end
+            
+            if blueOrbConnection then
+                blueOrbConnection:Disconnect()
+            end
+            
+            blueOrbConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local args = {"collectOrb", "Blue Orb", "City"}
+                game:GetService("ReplicatedStorage").rEvents.orbEvent:FireServer(unpack(args))
+            end)
+        else
+            if blueOrbConnection then
+                blueOrbConnection:Disconnect()
+                blueOrbConnection = nil
+            end
+        end
+    end
+})
+
+local Toggle3 = Tab:Toggle({
+    Title = "自动搜集黄球",
+    Desc = "FIN",
+    Locked = false,
+    Callback = function(state)
+        local autoCollectYellowOrb = state
+        
+        if autoCollectYellowOrb then
+                 if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                Character = waitForCharacter()
+                hum = Character:WaitForChild("HumanoidRootPart")
+            end
+
+            if yellowOrbConnection then
+                yellowOrbConnection:Disconnect()
+            end
+
+            yellowOrbConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local args = { "collectOrb", "Yellow Orb", "City"}
+                game:GetService("ReplicatedStorage").rEvents.orbEvent:FireServer(unpack(args))
+            end)
+        else
+            if yellowOrbConnection then
+                yellowOrbConnection:Disconnect()
+                yellowOrbConnection = nil
+            end
+        end
+    end
+})
+
+local Toggle4 = Tab:Toggle({
+    Title = "自动搜集橙色球",
+    Desc = "FIN",
+    Locked = false,
+    Callback = function(state)
+        local autoCollectOrangeOrb = state
+        
+        if autoCollectOrangeOrb then
+                 if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                Character = waitForCharacter()
+                hum = Character:WaitForChild("HumanoidRootPart")
+            end
+
+            if orangeOrbConnection then
+                orangeOrbConnection:Disconnect()
+            end
+
+            orangeOrbConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local args = { "collectOrb", "Orange Orb", "City"}
+                game:GetService("ReplicatedStorage").rEvents.orbEvent:FireServer(unpack(args))
+            end)
+        else
+            if orangeOrbConnection then
+                orangeOrbConnection:Disconnect()
+                orangeOrbConnection = nil
+            end
+        end
+    end
+})
+
+local Toggle5 = Tab:Toggle({
+    Title = "自动搜集钻石",
+    Desc = "FIN",
+    Locked = false,
+    Callback = function(state)
+        local autoCollectGemOrb = state
+        
+        if autoCollectGemOrb then
+                 if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                Character = waitForCharacter()
+                hum = Character:WaitForChild("HumanoidRootPart")
+            end
+
+            if gemOrbConnection then
+                gemOrbConnection:Disconnect()
+            end
+
+            gemOrbConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local args = { "collectOrb", "Gem", "City"}
+                game:GetService("ReplicatedStorage").rEvents.orbEvent:FireServer(unpack(args))
+            end)
+        else
+            if gemOrbConnection then
+                gemOrbConnection:Disconnect()
+                gemOrbConnection = nil
+            end
+        end
+    end
+})
+
+local Toggle6 = Tab:Toggle({
+    Title = "自动重生",
+    Desc = "FIN",
+    Locked = false,
+    Callback = function(state)
+        local autoCollectRebirthRequestOrb = state
+        
+        if autoCollectRebirthRequestOrb then
+                 if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                Character = waitForCharacter()
+                hum = Character:WaitForChild("HumanoidRootPart")
+            end
+
+            if rebirthRequestOrbConnection then
+                rebirthRequestOrbConnection:Disconnect()
+            end
+
+            rebirthOrbConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local args = { "rebirthRequest"}
+                game:GetService("ReplicatedStorage").rEvents.rebirthEvent:FireServer(unpack(args))
+            end)
+        else
+            if rebirthRequestirthOrbConnection then
+                rebirthRequestirthOrbConnection:Disconnect()
+                rebirthRequestirthOrbConnection = nil
+            end
+        end
+    end
+})
+
+local Tab = Window:Tab({
+    Title = "自动抽奖",
+    Icon = "zap",
+    Locked = false,
+})
+
+local Toggle7 = Tab:Toggle({
+    Title = "自动抽紫水晶",
+    Desc = "FIN",
+    Locked = false,
+    Callback = function(state)
+        local autoCollectPurpleOrb = state
+        
+        if autoCollectPurpleOrb then
+                 if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                Character = waitForCharacter()
+                hum = Character:WaitForChild("HumanoidRootPart")
+            end
+
+            if purpleOrbConnection then
+               purpleOrbConnection:Disconnect()
+            end
+
+            purpleOrbConnection = game:GetService("RunService").Heartbeat:Connect(function()
+               local args = { "openCrystal", "Purple Crystal"}
+               game:GetService("ReplicatedStorage").rEvents.openCrystalRemote:InvokeServer(unpack(args))
+            end)
+        else
+            if purpleOrbConnection then
+                purpleOrbConnection:Disconnect()
+                purpleOrbConnection = nil
+            end
+        end
+    end
+})
+
+local Toggle8 = Tab:Toggle({
+    Title = "自动抽红水晶",
+    Desc = "FIN",
+    Locked = false,
+    Callback = function(state)
+        autoOpenRedCrystal = state
+        
+        if autoOpenRedCrystal then
+            if not Character or not hum then
+                waitForCharacter()
+            end
+            
+            if redCrystalConnection then
+                redCrystalConnection:Disconnect()
+            end
+            
+            redCrystalConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local args = {"openCrystal","Red Crystal"}
+                game:GetService("ReplicatedStorage").rEvents.openCrystalRemote:InvokeServer(unpack(args))
+            end)
+        else
+            if redCrystalConnection then
+                redCrystalConnection:Disconnect()
+                redCrystalConnection = nil
+            end
+        end
+    end
+})
+
+local Toggle9 = Tab:Toggle({
+    Title = "自动抽黄水晶",
+    Desc = "FIN",
+    Locked = false,
+    Callback = function(state)
+        autoOpenYellowCrystal = state
+        
+        if autoOpenYellowCrystal then
+            if not Character or not hum then
+                waitForCharacter()
+            end
+            
+            if yellowCrystalConnection then
+                yellowCrystalConnection:Disconnect()
+            end
+            
+            yellowCrystalConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local args = {"openCrystal","Yellow Crystal"}
+                game:GetService("ReplicatedStorage").rEvents.openCrystalRemote:InvokeServer(unpack(args))
+            end)
+        else
+            if yellowCrystalConnection then
+                yellowCrystalConnection:Disconnect()
+                yellowCrystalConnection = nil
+            end
+        end
+    end
+})
+
+local Toggle10 = Tab:Toggle({
+    Title = "自动抽蓝水晶",
+    Desc = "FIN",
+    Locked = false,
+    Callback = function(state)
+        autoOpenBlueCrystal = state
+        
+        if autoOpenBlueCrystal then
+            if not Character or not hum then
+                waitForCharacter()
+            end
+            
+            if blueCrystalConnection then
+                blueCrystalConnection:Disconnect()
+            end
+            
+            blueCrystalConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local args = {"openCrystal","Blue Crystal"}
+                game:GetService("ReplicatedStorage").rEvents.openCrystalRemote:InvokeServer(unpack(args))
+            end)
+        else
+            if blueCrystalConnection then
+                blueCrystalConnection:Disconnect()
+                blueCrystalConnection = nil
+            end
+        end
+    end
+})
+
+local Toggle11 = Tab:Toggle({
+    Title = "自动抽闪电水晶",
+    Desc = "FIN",
+    Locked = false,
+    Callback = function(state)
+        autoOpenLightningCrystal = state
+        
+        if autoOpenLightningCrystal then
+            if not Character or not hum then
+                waitForCharacter()
+            end
+            
+            if lightningCrystalConnection then
+                lightningCrystalConnection:Disconnect()
+            end
+            
+            lightningCrystalConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local args = {"openCrystal","Lightning Crystal"}
+                game:GetService("ReplicatedStorage").rEvents.openCrystalRemote:InvokeServer(unpack(args))
+            end)
+        else
+            if lightningCrystalConnection then
+                lightningCrystalConnection:Disconnect()
+                lightningCrystalConnection = nil
+            end
+        end
+    end
+})
+
+local Button = Tab:Button({
+    Title = "传送到主城",
+    Desc = "传送到冰霜路线",
+    Callback = function()
+        pcall(function()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = 
+                CFrame.new(2002.0133056640625, 1.2624330520629883, 985.2265625)
+        end)
+    end
+})
+
+local Tab = Window:Tab({
+    Title = "传送",
+    Icon = "zap",
+    Locked = false,
+})
+
+local Button = Tab:Button({
+    Title = "传送到雪城",
+    Desc = "传送到冰雪区域",
+    Callback = function()
+        pcall(function()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = 
+                CFrame.new(-9675.25, 59.63568115234375, 3783.50146484375)
+        end)
+    end
+})
+
+local Button = Tab:Button({
+    Title = "传送到火山",
+    Desc = "传送到火山区域",
+    Callback = function()
+        pcall(function()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = 
+                CFrame.new(-11052.4189453125, 217.59571838378906, 4898.76416015625)
+        end)
+    end
+})
+
+local Button = Tab:Button({
+    Title = "传送到公路",
+    Desc = "传送到高速公路",
+    Callback = function()
+        pcall(function()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = 
+                CFrame.new(-13095.255859375, 217.59567260742188, 5905.240234375)
+        end)
+    end
+})
