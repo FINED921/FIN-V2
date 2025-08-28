@@ -16,7 +16,7 @@ WindUI:Popup({
     Content = "尊敬的FIN用户👑,祝你天天开心",
     Buttons = {
         {
-            Title = "启动FIN | 被遗弃",
+            Title = "启动",
             Icon = "arrow-right",
             Variant = "Primary",
             Callback = function() 
@@ -67,7 +67,7 @@ function createMainWindow()
     })
 
     Window:EditOpenButton({
-        Title = "FIN脚本",
+        Title = "FIN | 被遗弃",
         Icon = "star",
         CornerRadius = UDim.new(0,16),
         StrokeThickness = 2,
@@ -152,7 +152,105 @@ function createMainWindow()
         end
     })
 
-    local Tab3 = Window:Tab({
+local Tab3 = Window:Tab({
+        Title = "自动收取物品",
+        Icon = "drama",
+        Locked = false,
+    })
+
+local Toggle = Tab:Toggle({
+        Title = "医疗包传送且获取",
+        Desc = "FIN",
+        Locked = false,
+        Callback = function(state)
+        autoTeleportMedkitEnabled = state
+        
+        if autoTeleportMedkitEnabled then
+            teleportMedkitThread = task.spawn(function()
+                while autoTeleportMedkitEnabled and task.wait(0.5) do
+                  
+                    local character = game.Players.LocalPlayer.Character
+                    if character and character:FindFirstChild("HumanoidRootPart") then
+                        local humanoidRootPart = character.HumanoidRootPart
+                        
+                      
+                        local medkit = workspace:FindFirstChild("Map", true)
+                        if medkit then
+                            medkit = medkit:FindFirstChild("Ingame", true)
+                            if medkit then
+                                medkit = medkit:FindFirstChild("Medkit", true)
+                                if medkit then
+                                    local itemRoot = medkit:FindFirstChild("ItemRoot", true)
+                                    if itemRoot then
+                                       
+                                        itemRoot.CFrame = humanoidRootPart.CFrame + humanoidRootPart.CFrame.LookVector * 3
+                                        
+                                       
+                                        local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
+                                        if prompt then
+                                            fireproximityprompt(prompt)
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        elseif teleportMedkitThread then
+            task.cancel(teleportMedkitThread)
+            teleportMedkitThread = nil
+        end
+    end
+})
+
+local Toggle = Tab:Toggle({
+        Title = "可乐罐传送且获取",
+        Desc = "FIN",
+        Locked = false,
+        Callback = function(state)
+        autoTeleportColaEnabled = state
+        
+        if autoTeleportColaEnabled then
+            teleportColaThread = task.spawn(function()
+                while autoTeleportColaEnabled and task.wait(0.5) do
+                    -- 获取玩家角色
+                    local character = game.Players.LocalPlayer.Character
+                    if character and character:FindFirstChild("HumanoidRootPart") then
+                        local humanoidRootPart = character.HumanoidRootPart
+                        
+                        -- 查找可乐
+                        local cola = workspace:FindFirstChild("Map", true)
+                        if cola then
+                            cola = cola:FindFirstChild("Ingame", true)
+                            if cola then
+                                cola = cola:FindFirstChild("BloxyCola", true)
+                                if cola then
+                                    local itemRoot = cola:FindFirstChild("ItemRoot", true)
+                                    if itemRoot then
+                                        -- 将可乐传送到玩家前方3个单位的位置
+                                        itemRoot.CFrame = humanoidRootPart.CFrame + humanoidRootPart.CFrame.LookVector * 3
+                                        
+                                        -- 查找互动提示并触发
+                                        local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
+                                        if prompt then
+                                            fireproximityprompt(prompt)
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        elseif teleportColaThread then
+            task.cancel(teleportColaThread)
+            teleportColaThread = nil
+        end
+    end
+})
+
+    local Tab4 = Window:Tab({
         Title = "修机",
         Icon = "drama",
         Locked = false,
