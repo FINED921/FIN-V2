@@ -49,3 +49,12 @@ local Tab = Window:Tab({
     Icon = "zap",
     Locked = false,
 })
+
+local Slider = Tab:Slider({
+    Title = "速度调节",
+    Min = 0
+    Max = 3
+    Callback = function()
+    _env.SpeedBoostValue = v
+    end
+})
