@@ -10,6 +10,10 @@ local StaminaSettings = {
     InfiniteGain = 9999
 }
 
+-- 声明所有线程控制变量
+local teleportMedkitThread, teleportColaThread, medkitThread, colaThread
+local autoTeleportMedkitEnabled, autoTeleportColaEnabled, autoMedkitEnabled, autoColaEnabled
+
 WindUI:Popup({
     Title = "欢迎使用FIN脚本",
     Icon = "sparkles",
@@ -152,28 +156,106 @@ function createMainWindow()
         end
     })
 
-local Tab3 = Window:Tab({
+    local Tab3 = Window:Tab({
         Title = "自动收取物品",
         Icon = "drama",
         Locked = false,
     })
 
-local Toggle3 = Tab3:Toggle({
+    local Toggle3 = Tab3:Toggle({
         Title = "医疗包传送且获取",
         Desc = "FIN",
         Locked = false,
         Callback = function(state)
-        autoTeleportMedkitEnabled = state
-        
-        if autoTeleportMedkitEnabled then
-            teleportMedkitThread = task.spawn(function()
-                while autoTeleportMedkitEnabled and task.wait(0.5) do
-                  
-                    local character = game.Players.LocalPlayer.Character
-                    if character and character:FindFirstChild("HumanoidRootPart") then
-                        local humanoidRootPart = character.HumanoidRootPart
-                        
-                      
+            autoTeleportMedkitEnabled = state
+            
+            if autoTeleportMedkitEnabled then
+                teleportMedkitThread = task.spawn(function()
+                    while autoTeleportMedkitEnabled and task.wait(0.5) do
+                        local character = game.Players.LocalPlayer.Character
+                        if character and character:FindFirstChild("HumanoidRootPart") then
+                            local humanoidRootPart = character.HumanoidRootPart
+                            
+                            local medkit = workspace:FindFirstChild("Map", true)
+                            if medkit then
+                                medkit = medkit:FindFirstChild("Ingame", true)
+                                if medkit then
+                                    medkit = medkit:FindFirstChild("Medkit", true)
+                                    if medkit then
+                                        local itemRoot = medkit:FindFirstChild("ItemRoot", true)
+                                        if itemRoot then
+                                            itemRoot.CFrame = humanoidRootPart.CFrame + humanoidRootPart.CFrame.LookVector * 3
+                                            
+                                            local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
+                                            if prompt then
+                                                fireproximityprompt(prompt)
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+            elseif teleportMedkitThread then
+                task.cancel(teleportMedkitThread)
+                teleportMedkitThread = nil
+            end
+        end
+    })
+
+    local Toggle4 = Tab3:Toggle({
+        Title = "可乐罐传送且获取",
+        Desc = "FIN",
+        Locked = false,
+        Callback = function(state)
+            autoTeleportColaEnabled = state
+            
+            if autoTeleportColaEnabled then
+                teleportColaThread = task.spawn(function()
+                    while autoTeleportColaEnabled and task.wait(0.5) do
+                        local character = game.Players.LocalPlayer.Character
+                        if character and character:FindFirstChild("HumanoidRootPart") then
+                            local humanoidRootPart = character.HumanoidRootPart
+                            
+                            local cola = workspace:FindFirstChild("Map", true)
+                            if cola then
+                                cola = cola:FindFirstChild("Ingame", true)
+                                if cola then
+                                    cola = cola:FindFirstChild("BloxyCola", true)
+                                    if cola then
+                                        local itemRoot = cola:FindFirstChild("ItemRoot", true)
+                                        if itemRoot then
+                                            itemRoot.CFrame = humanoidRootPart.CFrame + humanoidRootPart.CFrame.LookVector * 3
+                                            
+                                            local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
+                                            if prompt then
+                                                fireproximityprompt(prompt)
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+            elseif teleportColaThread then
+                task.cancel(teleportColaThread)
+                teleportColaThread = nil
+            end
+        end
+    })
+
+    local Toggle5 = Tab3:Toggle({
+        Title = "自动互动医疗包",
+        Desc = "不关上无法丢弃💀",
+        Locked = false,
+        Callback = function(state)
+            autoMedkitEnabled = state
+            
+            if autoMedkitEnabled then
+                medkitThread = task.spawn(function()
+                    while autoMedkitEnabled and task.wait(0.5) do
                         local medkit = workspace:FindFirstChild("Map", true)
                         if medkit then
                             medkit = medkit:FindFirstChild("Ingame", true)
@@ -182,10 +264,6 @@ local Toggle3 = Tab3:Toggle({
                                 if medkit then
                                     local itemRoot = medkit:FindFirstChild("ItemRoot", true)
                                     if itemRoot then
-                                       
-                                        itemRoot.CFrame = humanoidRootPart.CFrame + humanoidRootPart.CFrame.LookVector * 3
-                                        
-                                       
                                         local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
                                         if prompt then
                                             fireproximityprompt(prompt)
@@ -195,31 +273,24 @@ local Toggle3 = Tab3:Toggle({
                             end
                         end
                     end
-                end
-            end)
-        elseif teleportMedkitThread then
-            task.cancel(teleportMedkitThread)
-            teleportMedkitThread = nil
+                end)
+            elseif medkitThread then
+                task.cancel(medkitThread)
+                medkitThread = nil
+            end
         end
-    end
-})
+    })
 
-local Toggle4 = Tab3:Toggle({
-        Title = "可乐罐传送且获取",
-        Desc = "FIN",
+    local Toggle6 = Tab3:Toggle({
+        Title = "自动互动可乐罐",
+        Desc = "不关上无法丢弃💀",
         Locked = false,
         Callback = function(state)
-        autoTeleportColaEnabled = state
-        
-        if autoTeleportColaEnabled then
-            teleportColaThread = task.spawn(function()
-                while autoTeleportColaEnabled and task.wait(0.5) do
-                    -- 获取玩家角色
-                    local character = game.Players.LocalPlayer.Character
-                    if character and character:FindFirstChild("HumanoidRootPart") then
-                        local humanoidRootPart = character.HumanoidRootPart
-                        
-                        -- 查找可乐
+            autoColaEnabled = state
+            
+            if autoColaEnabled then
+                colaThread = task.spawn(function()
+                    while autoColaEnabled and task.wait(0.5) do
                         local cola = workspace:FindFirstChild("Map", true)
                         if cola then
                             cola = cola:FindFirstChild("Ingame", true)
@@ -228,10 +299,6 @@ local Toggle4 = Tab3:Toggle({
                                 if cola then
                                     local itemRoot = cola:FindFirstChild("ItemRoot", true)
                                     if itemRoot then
-                                        -- 将可乐传送到玩家前方3个单位的位置
-                                        itemRoot.CFrame = humanoidRootPart.CFrame + humanoidRootPart.CFrame.LookVector * 3
-                                        
-                                        -- 查找互动提示并触发
                                         local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
                                         if prompt then
                                             fireproximityprompt(prompt)
@@ -241,122 +308,53 @@ local Toggle4 = Tab3:Toggle({
                             end
                         end
                     end
-                end
-            end)
-        elseif teleportColaThread then
-            task.cancel(teleportColaThread)
-            teleportColaThread = nil
+                end)
+            elseif colaThread then
+                task.cancel(colaThread)
+                colaThread = nil
+            end
         end
-    end
-})
+    })
 
-local Toggle5 = Tab3:Toggle({
-        Title = "自动互动医疗包",
-        Desc = "不关上无法丢弃💀",
-        Locked = false,
-        Callback = function(state)
-       autoMedkitEnabled = state
-        
-        if autoMedkitEnabled then
-            medkitThread = task.spawn(function()
-                while autoMedkitEnabled and task.wait(0.5) do
-                    local medkit = workspace:FindFirstChild("Map", true)
-                    if medkit then
-                        medkit = medkit:FindFirstChild("Ingame", true)
-                        if medkit then
-                            medkit = medkit:FindFirstChild("Medkit", true)
-                            if medkit then
-                                local itemRoot = medkit:FindFirstChild("ItemRoot", true)
-                                if itemRoot then
-                                    local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
-                                    if prompt then
-                                        fireproximityprompt(prompt)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end)
-        elseif medkitThread then
-            task.cancel(medkitThread)
-            medkitThread = nil
-        end
-    end
-})
-
-local Toggle6 = Tab3:Toggle({
-        Title = "自动互动可乐罐",
-        Desc = "不关上无法丢弃💀",
-        Locked = false,
-        Callback = function(state)
-        autoColaEnabled = state
-        
-        if autoColaEnabled then
-            colaThread = task.spawn(function()
-                while autoColaEnabled and task.wait(0.5) do
-                    local cola = workspace:FindFirstChild("Map", true)
-                    if cola then
-                        cola = cola:FindFirstChild("Ingame", true)
-                        if cola then
-                            cola = cola:FindFirstChild("BloxyCola", true)
-                            if cola then
-                                local itemRoot = cola:FindFirstChild("ItemRoot", true)
-                                if itemRoot then
-                                    local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
-                                    if prompt then
-                                        fireproximityprompt(prompt)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end)
-        elseif colaThread then
-            task.cancel(colaThread)
-            colaThread = nil
-        end
-    end
-})
-
-local Tab4 = Window:Tab({
+    local Tab4 = Window:Tab({
         Title = "修发动机",
-        Icon = "zap",
+        Icon = "drama",
         Locked = false,
     })
 
-local Toggle7 = Tab4:Toggle({
+    local Toggle7 = Tab4:Toggle({
         Title = "自动修机",
         Desc = "FIN",
         Locked = false,
         Callback = function(state)
-        _G.BTE = state
+            _G.BTE = state
+            _G.REP = _G.REP or 1.80
 
-        local function RepairGenerators()
-            local map = workspace:FindFirstChild("Map")
-            local ingame = map and map:FindFirstChild("Ingame")
-            local currentMap = ingame and ingame:FindFirstChild("Map")
+            local function RepairGenerators()
+                local map = workspace:FindFirstChild("Map")
+                local ingame = map and map:FindFirstChild("Ingame")
+                local currentMap = ingame and ingame:FindFirstChild("Map")
 
-            if currentMap then
-                for _, obj in ipairs(currentMap:GetChildren()) do
-                    if obj.Name == "Generator" and obj:FindFirstChild("Progress") and obj.Progress.Value < 100 then
-                        local remote = obj:FindFirstChild("Remotes") and obj.Remotes:FindFirstChild("RE")
-                        if remote then
-                            remote:FireServer()
+                if currentMap then
+                    for _, obj in ipairs(currentMap:GetChildren()) do
+                        if obj.Name == "Generator" and obj:FindFirstChild("Progress") and obj.Progress.Value < 100 then
+                            local remote = obj:FindFirstChild("Remotes") and obj.Remotes:FindFirstChild("RE")
+                            if remote then
+                                remote:FireServer()
+                            end
                         end
                     end
                 end
             end
-        end
 
-        if state then
-            task.spawn(function()
-                while _G.BTE do
-                    RepairGenerators()
-                    task.wait(_G.REP or 1.80) 
-                end
-            end)
+            if state then
+                task.spawn(function()
+                    while _G.BTE do
+                        RepairGenerators()
+                        task.wait(_G.REP)
+                    end
+                end)
+            end
         end
-    end
-})
+    })
+end
