@@ -49,24 +49,40 @@ local Tab = Window:Tab({
     Locked = false,
 })
 
+-- 安全地获取默认步行速度
+local function getDefaultWalkSpeed()
+    local player = game.Players.LocalPlayer
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        return player.Character.Humanoid.WalkSpeed
+    else
+        -- 如果角色或Humanoid不存在，使用安全的默认值
+        return 16
+    end
+end
+
+-- 创建滑块控件
 local Slider = Tab:Slider({
     Title = "步行速度",
     Min = 16,
     Max = 400,
-    Default = 16, 
+    Default = getDefaultWalkSpeed(), -- 使用安全函数获取默认值
     Callback = function(Speed)
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid")
         
-        local character = game.Players.LocalPlayer.Character
-        if character and character:FindFirstChild("Humanoid") then
-            character.Humanoid.WalkSpeed = Speed
-        end
+        -- 安全地设置步行速度
+        humanoid.WalkSpeed = Speed
     end
 })
 
+-- 添加角色变化监听，确保新角色也应用设置的速度
 game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
     character:WaitForChild("Humanoid")
-
-    character.Humanoid.WalkSpeed = Slider.Value
+    -- 当角色变化时，重新应用当前滑块值
+    if Slider and Slider.Value then
+        character.Humanoid.WalkSpeed = Slider.Value
+    end
 end)
 
 local Toggle = Tab:Toggle({
