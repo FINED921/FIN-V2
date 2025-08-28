@@ -73,3 +73,9 @@ local Tab = Window:Tab({
     Icon = "drama",
     Locked = false,
 })
+
+local Tab = Window:Tab({
+    Title = "修机",
+    Icon = "drama",
+    Locked = false,
+})
