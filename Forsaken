@@ -1,158 +1,160 @@
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
-WindUI:Notify({
-    Title = "FIN | 被遗弃 启动中",
-    Content = "尊贵的FIN用户 欢迎使用FIN脚本",
-    Duration = 5,
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TextChatService = game:GetService("TextChatService")
+
+local StaminaSettings = {
+    StaminaLoss = 10,
+    StaminaGain = 25,
+    InfiniteGain = 9999
+}
+
+WindUI:Popup({
+    Title = "欢迎使用FIN脚本",
+    Icon = "sparkles",
+    Content = "尊敬的FIN用户👑,祝你天天开心",
+    Buttons = {
+        {
+            Title = "启动FIN | 被遗弃",
+            Icon = "arrow-right",
+            Variant = "Primary",
+            Callback = function() 
+                print("启动被遗弃")
+                -- 创建主窗口
+                createMainWindow()
+            end
+        }
+    }
 })
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+function createMainWindow()
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+    local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local hum = Character:WaitForChild("HumanoidRootPart")
+    local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local hum = Character:WaitForChild("HumanoidRootPart")
-local PlayerGui = LocalPlayer.PlayerGui
+    local Window = WindUI:CreateWindow({
+        Title = "FIN | 被遗弃",
+        Icon = "rbxassetid://129260712070622",
+        IconThemed = true,
+        Author = "作者:鑫晴",
+        Folder = "CloudHub",
+        Size = UDim2.fromOffset(300, 270),
+        Transparent = true,
+        Theme = "Dark",
+        User = {
+            Enabled = true,
+            Callback = function() print("clicked") end,
+            Anonymous = false
+        },
+        SideBarWidth = 200,
+        ScrollBarEnabled = true,
+    })
 
-local Window = WindUI:CreateWindow({
-    Title = "FIN | 被遗弃",
-    Icon = "rbxassetid://129260712070622",
-    IconThemed = true,
-    Author = "作者:鑫晴",
-    Folder = "CloudHub",
-    Size = UDim2.fromOffset(300, 270),
-    Transparent = true,
-    Theme = "Dark",
-    User = {
-        Enabled = true,
-        Callback = function() print("clicked") end,
-        Anonymous = false
-    },
-    SideBarWidth = 200,
-    ScrollBarEnabled = true,
-})
+    Window:Tag({
+        Title = "v1.3.4",
+        Color = Color3.fromHex("#30ff6a")
+    })
+    Window:Tag({
+        Title = "测试版", 
+        Color = Color3.fromHex("#315dff")
+    })
+    local TimeTag = Window:Tag({
+        Title = "持续更新",
+        Color = Color3.fromHex("#000000")
+    })
 
-Window:EditOpenButton({
-    Title = "FIN | 被遗弃",
-    Icon = "star",
-    CornerRadius = UDim.new(0,16),
-    StrokeThickness = 2,
-    Color = ColorSequence.new(
-        Color3.fromHex("FF0F7B"), 
-        Color3.fromHex("F89B29")
-    ),
-    Draggable = true,
-})
+    Window:EditOpenButton({
+        Title = "FIN脚本",
+        Icon = "star",
+        CornerRadius = UDim.new(0,16),
+        StrokeThickness = 2,
+        Color = ColorSequence.new(
+            Color3.fromHex("FF0F7B"), 
+            Color3.fromHex("F89B29")
+        ),
+        Draggable = true,
+    })
 
-local Tab = Window:Tab({
-    Title = "基础功能",
-    Icon = "drama",
-    Locked = false,
-})
+    local Tab = Window:Tab({
+        Title = "基础功能",
+        Icon = "drama",
+        Locked = false,
+    })
 
--- 安全地获取默认步行速度
-local function getDefaultWalkSpeed()
-    local player = game.Players.LocalPlayer
-    if player.Character and player.Character:FindFirstChild("Humanoid") then
-        return player.Character.Humanoid.WalkSpeed
-    else
-        -- 如果角色或Humanoid不存在，使用安全的默认值
-        return 16
-    end
-end
-
--- 创建滑块控件
-local Slider = Tab:Slider({
-    Title = "步行速度",
-    Min = 16,
-    Max = 400,
-    Default = getDefaultWalkSpeed(), -- 使用安全函数获取默认值
-    Callback = function(Speed)
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:WaitForChild("Humanoid")
-        
-        -- 安全地设置步行速度
-        humanoid.WalkSpeed = Speed
-    end
-})
-
--- 添加角色变化监听，确保新角色也应用设置的速度
-game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
-    character:WaitForChild("Humanoid")
-    -- 当角色变化时，重新应用当前滑块值
-    if Slider and Slider.Value then
-        character.Humanoid.WalkSpeed = Slider.Value
-    end
-end)
-
-local Toggle = Tab:Toggle({
-    Title = "显示局内聊天框",
-    Desc = "FIN",
-    Locked = false,
-    Callback = function(state)
-        game.TextChatService.ChatWindowConfiguration.Enabled = state
-    end
-})
-
-local Tab = Window:Tab({
-    Title = "体力消耗",
-    Icon = "drama",
-    Locked = false,
-})
-
--- 获取游戏体力模块
-local SprintingModule = ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting")
-local GetModule = function() return require(SprintingModule) end
-
--- 实时更新体力设置
-task.spawn(function()
-    while true do
-        local m = GetModule()
-        for key, value in pairs(StaminaSettings) do
-            if SettingToggles[key] then
-                m[key] = value
+    local Toggle = Tab:Toggle({
+        Title = "显示局内聊天框",
+        Desc = "FIN",
+        Locked = false,
+        Callback = function(state)
+            if TextChatService:FindFirstChild("ChatWindowConfiguration") then
+                TextChatService.ChatWindowConfiguration.Enabled = state
             end
         end
-        task.wait(0.5)
+    })
+
+    local Tab2 = Window:Tab({
+        Title = "体力消耗",
+        Icon = "drama",
+        Locked = false,
+    })
+
+    local function GetSprintingModule()
+        if ReplicatedStorage:FindFirstChild("Systems") and
+           ReplicatedStorage.Systems:FindFirstChild("Character") and
+           ReplicatedStorage.Systems.Character:FindFirstChild("Game") and
+           ReplicatedStorage.Systems.Character.Game:FindFirstChild("Sprinting") then
+            return require(ReplicatedStorage.Systems.Character.Game.Sprinting)
+        end
+        return nil
     end
-end)
 
--- 无限体力功能
-local bai = {Spr = false}
-local connection
+    local bai = {Spr = false}
+    local connection
 
-local Toggle = Tab:Toggle({
-    Title = "无限体力",
-    Desc = "FIN",
-    Locked = false,
-    Callback = function(state)
-        bai.Spr = state
-        local Sprinting = GetModule()
+    local Toggle2 = Tab2:Toggle({
+        Title = "无限体力",
+        Desc = "FIN",
+        Locked = false,
+        Callback = function(state)
+            bai.Spr = state
+            local Sprinting = GetSprintingModule()
+            
+            if not Sprinting then
+                warn("无法找到体力模块!")
+                return
+            end
 
-        if state then
-            Sprinting.StaminaLoss = 0
-            Sprinting.StaminaGain = StaminaSettings.InfiniteGain or 9999
-
-            if connection then connection:Disconnect() end
-            connection = RunService.Heartbeat:Connect(function()
-                if not bai.Spr then return end
+            if state then
                 Sprinting.StaminaLoss = 0
                 Sprinting.StaminaGain = StaminaSettings.InfiniteGain or 9999
-            end)
-        else
-            Sprinting.StaminaLoss = StaminaSettings.StaminaLoss or 10
-            Sprinting.StaminaGain = StaminaSettings.StaminaGain or 25
 
-            if connection then
-                connection:Disconnect()
-                connection = nil
+                if connection then connection:Disconnect() end
+                connection = RunService.Heartbeat:Connect(function()
+                    if not bai.Spr then 
+                        connection:Disconnect()
+                        return 
+                    end
+                    Sprinting.StaminaLoss = 0
+                    Sprinting.StaminaGain = StaminaSettings.InfiniteGain or 9999
+                end)
+            else
+                Sprinting.StaminaLoss = StaminaSettings.StaminaLoss or 10
+                Sprinting.StaminaGain = StaminaSettings.StaminaGain or 25
+
+                if connection then
+                    connection:Disconnect()
+                    connection = nil
+                end
             end
         end
-    end
-})
+    })
 
-local Tab = Window:Tab({
-    Title = "修机",
-    Icon = "drama",
-    Locked = false,
-})
+    local Tab3 = Window:Tab({
+        Title = "修机",
+        Icon = "drama",
+        Locked = false,
+    })
+end
