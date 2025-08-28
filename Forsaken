@@ -53,11 +53,21 @@ local Slider = Tab:Slider({
     Title = "步行速度",
     Min = 16,
     Max = 400,
-    Default = game.Players.LocalPlayer.Character.Humanoid.WalkSpeed,
+    Default = 16, 
     Callback = function(Speed)
-       game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Speed
-   end
+        
+        local character = game.Players.LocalPlayer.Character
+        if character and character:FindFirstChild("Humanoid") then
+            character.Humanoid.WalkSpeed = Speed
+        end
+    end
 })
+
+game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
+    character:WaitForChild("Humanoid")
+
+    character.Humanoid.WalkSpeed = Slider.Value
+end)
 
 local Toggle = Tab:Toggle({
     Title = "显示局内聊天框",
