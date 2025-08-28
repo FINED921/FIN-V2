@@ -156,21 +156,6 @@ function createMainWindow()
         end
     })
 
-    local Slider = Tab2:Slider({
-        Title = T("最大体力值"),
-        Step = 1,
-        Value = {
-        Min = 100,
-        Max = 1000,
-        Default = 100,
-   },
-          Callback = function(value)
-                        task.spawn(function()
-                        Sprinting.MaxStamina = value
-            end)           
-         end        
-    })
-
     local Tab3 = Window:Tab({
         Title = "自动收取物品",
         Icon = "drama",
