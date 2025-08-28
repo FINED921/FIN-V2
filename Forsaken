@@ -99,6 +99,66 @@ function createMainWindow()
         end
     })
 
+            local Slider = Tab:Slider({
+                Title = T("最大体力值"),
+                Step = 1,
+                Value = {
+                    Min = 100,
+                    Max = 1000,
+                    Default = 100,
+                },
+                Callback = function(value)
+                    task.spawn(function()
+                        Sprinting.MaxStamina = value
+                    end)
+                end
+            })
+
+            local Slider = Tab:Slider({
+                Title = T("奔跑速度"),
+                Step = 1,
+                Value = {
+                    Min = 26,
+                    Max = 40,
+                    Default = 26,
+                },
+                Callback = function(value)
+                    task.spawn(function()
+                        Sprinting.SprintSpeed = value
+                    end)
+                end
+            })
+
+            local Slider = Tab:Slider({
+                Title = T("冲刺体力消耗(秒)"),
+                Step = 1,
+                Value = {
+                    Min = 0,
+                    Max = 10,
+                    Default = 7,
+                },
+                Callback = function(value)
+                    task.spawn(function()
+                        Sprinting.StaminaLoss = value
+                    end)
+                end
+            })
+
+            local Slider = Tab:Slider({
+                Title = T("停止时恢复体力(秒)"),
+                Step = 1,
+                Value = {
+                    Min = 20,
+                    Max = 1000,
+                    Default = 35,
+                },
+                Callback = function(value)
+                    task.spawn(function()
+                        Sprinting.StaminaGain = value
+                    end)
+                end
+            })
+
     local Tab2 = Window:Tab({
         Title = "体力消耗",
         Icon = "drama",
