@@ -391,6 +391,12 @@ local Toggle11 = Tab:Toggle({
     end
 })
 
+local Tab = Window:Tab({
+    Title = "传送",
+    Icon = "zap",
+    Locked = false,
+})
+
 local Button = Tab:Button({
     Title = "传送到主城",
     Desc = "传送到冰霜路线",
@@ -400,12 +406,6 @@ local Button = Tab:Button({
                 CFrame.new(2002.0133056640625, 1.2624330520629883, 985.2265625)
         end)
     end
-})
-
-local Tab = Window:Tab({
-    Title = "传送",
-    Icon = "zap",
-    Locked = false,
 })
 
 local Button = Tab:Button({
