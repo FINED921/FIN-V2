@@ -44,17 +44,12 @@ Window:EditOpenButton({
     Draggable = true,
 })
 
-local Tab = Window:Tab({
-    Title = "基础功能", 
-    Icon = "zap",
+local Toggle = Tab:Toggle({
+    Title = "去除前后摇",
+    Desc = "FIN",
     Locked = false,
-})
-
-local Slider = Tab:Slider({
-    Title = "速度调节",
-    Min = 0,
-    Max = 3,
-    Callback = function(value)
-        _env.SpeedBoostValue = value
+    Callback = function(v)
+        _env.NoStun = v
     end
 })
+
