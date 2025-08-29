@@ -1041,7 +1041,7 @@ end
     })
 end
 
-local Toggle13 = Tab5:Toggle({
+    local Toggle13 = Tab5:Toggle({
         Title = "绘制发电机",
         Desc = "FIN",
         Locked = false,
@@ -1241,7 +1241,7 @@ local Toggle13 = Tab5:Toggle({
     end
 })
 
-local Tab6 = Window:Tab({
+  local Tab6 = Window:Tab({
     Title = "VIP动作🤑",
     Icon = "drama",
     Locked = false,
