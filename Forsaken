@@ -10,10 +10,6 @@ local StaminaSettings = {
     InfiniteGain = 9999
 }
 
--- 声明所有线程控制变量
-local teleportMedkitThread, teleportColaThread, medkitThread, colaThread
-local autoTeleportMedkitEnabled, autoTeleportColaEnabled, autoMedkitEnabled, autoColaEnabled
-
 WindUI:Popup({
     Title = "欢迎使用FIN脚本",
     Icon = "sparkles",
@@ -38,6 +34,10 @@ function createMainWindow()
     local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
     local hum = Character:WaitForChild("HumanoidRootPart")
     local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+    
+    -- 声明所有线程控制变量
+    local teleportMedkitThread, teleportColaThread, medkitThread, colaThread
+    local autoTeleportMedkitEnabled, autoTeleportColaEnabled, autoMedkitEnabled, autoColaEnabled
 
     local Window = WindUI:CreateWindow({
         Title = "FIN | 被遗弃",
@@ -357,181 +357,181 @@ function createMainWindow()
             end
         end
     })
-end
 
-local Tab5 = Window:Tab({
+    local Tab5 = Window:Tab({
         Title = "绘制",
         Icon = "drama",
         Locked = false,
     })
 
--- 初始化设置
-local DistanceSettings = {
-    ShowSurvivors = true,
-    ShowKillers = true,
-    SurvivorColor = Color3.fromRGB(0, 191, 255), -- 默认幸存者蓝色
-    KillerColor = Color3.fromRGB(255, 0, 0),     -- 默认杀手红色
-    TextSize = 14
-}
+    -- 初始化设置
+    local DistanceSettings = {
+        ShowSurvivors = true,
+        ShowKillers = true,
+        SurvivorColor = Color3.fromRGB(0, 191, 255), -- 默认幸存者蓝色
+        KillerColor = Color3.fromRGB(255, 0, 0),     -- 默认杀手红色
+        TextSize = 14
+    }
 
--- 距离显示功能
-local function updateDistanceDisplay()
-    -- 先关闭现有连接
-    if getgenv().distanceUnderFeetConnection then
-        getgenv().distanceUnderFeetConnection:Disconnect()
-    end
-    
-    if getgenv().characterRemovedConnection then
-        getgenv().characterRemovedConnection:Disconnect()
-    end
-    
-    -- 如果两个都关闭则完全禁用
-    if not DistanceSettings.ShowSurvivors and not DistanceSettings.ShowKillers then
-        if getgenv().distanceUnderFeetLabels then
-            for _, data in pairs(getgenv().distanceUnderFeetLabels) do
-                pcall(function() data.label:Remove() end)
-            end
-            getgenv().distanceUnderFeetLabels = nil
+    -- 距离显示功能
+    local function updateDistanceDisplay()
+        -- 先关闭现有连接
+        if getgenv().distanceUnderFeetConnection then
+            getgenv().distanceUnderFeetConnection:Disconnect()
         end
-        return
-    end
-    
-    -- 初始化变量
-    local players = game:GetService("Players")
-    local runService = game:GetService("RunService")
-    local localPlayer = players.LocalPlayer
-    local camera = workspace.CurrentCamera
-    
-    -- 存储所有距离标签
-    getgenv().distanceUnderFeetLabels = getgenv().distanceUnderFeetLabels or {}
-    
-    -- 主循环
-    getgenv().distanceUnderFeetConnection = runService.RenderStepped:Connect(function()
-        local localChar = localPlayer.Character
-        if not localChar or not localChar:FindFirstChild("HumanoidRootPart") then return end
         
-        local localPos = localChar.HumanoidRootPart.Position
+        if getgenv().characterRemovedConnection then
+            getgenv().characterRemovedConnection:Disconnect()
+        end
         
-        -- 处理幸存者
-        if DistanceSettings.ShowSurvivors then
-            local survivors = workspace.Players:FindFirstChild("Survivors")
-            if survivors then
-                for _, survivor in ipairs(survivors:GetChildren()) do
-                    if survivor:IsA("Model") and survivor ~= localChar then
-                        local hrp = survivor:FindFirstChild("HumanoidRootPart")
-                        if hrp then
-                            if not getgenv().distanceUnderFeetLabels[survivor] then
-                                getgenv().distanceUnderFeetLabels[survivor] = {
-                                    label = Drawing.new("Text"),
-                                    type = "Survivor"
-                                }
-                                local label = getgenv().distanceUnderFeetLabels[survivor].label
-                                label.Size = DistanceSettings.TextSize
-                                label.Center = true
-                                label.Outline = true
-                                label.Font = 2
-                            end
-                            
-                            local data = getgenv().distanceUnderFeetLabels[survivor]
-                            local distance = math.floor((hrp.Position - localPos).Magnitude)
-                            local screenPos, onScreen = camera:WorldToViewportPoint(hrp.Position - Vector3.new(0, 3, 0))
-                            
-                            if onScreen then
-                                data.label.Position = Vector2.new(screenPos.X, screenPos.Y)
-                                data.label.Text = tostring(distance) .. "m"
-                                data.label.Color = DistanceSettings.SurvivorColor
-                                data.label.Visible = true
-                            else
-                                data.label.Visible = false
+        -- 如果两个都关闭则完全禁用
+        if not DistanceSettings.ShowSurvivors and not DistanceSettings.ShowKillers then
+            if getgenv().distanceUnderFeetLabels then
+                for _, data in pairs(getgenv().distanceUnderFeetLabels) do
+                    pcall(function() data.label:Remove() end)
+                end
+                getgenv().distanceUnderFeetLabels = nil
+            end
+            return
+        end
+        
+        -- 初始化变量
+        local players = game:GetService("Players")
+        local runService = game:GetService("RunService")
+        local localPlayer = players.LocalPlayer
+        local camera = workspace.CurrentCamera
+        
+        -- 存储所有距离标签
+        getgenv().distanceUnderFeetLabels = getgenv().distanceUnderFeetLabels or {}
+        
+        -- 主循环
+        getgenv().distanceUnderFeetConnection = runService.RenderStepped:Connect(function()
+            local localChar = localPlayer.Character
+            if not localChar or not localChar:FindFirstChild("HumanoidRootPart") then return end
+            
+            local localPos = localChar.HumanoidRootPart.Position
+            
+            -- 处理幸存者
+            if DistanceSettings.ShowSurvivors then
+                local survivors = workspace.Players:FindFirstChild("Survivors")
+                if survivors then
+                    for _, survivor in ipairs(survivors:GetChildren()) do
+                        if survivor:IsA("Model") and survivor ~= localChar then
+                            local hrp = survivor:FindFirstChild("HumanoidRootPart")
+                            if hrp then
+                                if not getgenv().distanceUnderFeetLabels[survivor] then
+                                    getgenv().distanceUnderFeetLabels[survivor] = {
+                                        label = Drawing.new("Text"),
+                                        type = "Survivor"
+                                    }
+                                    local label = getgenv().distanceUnderFeetLabels[survivor].label
+                                    label.Size = DistanceSettings.TextSize
+                                    label.Center = true
+                                    label.Outline = true
+                                    label.Font = 2
+                                end
+                                
+                                local data = getgenv().distanceUnderFeetLabels[survivor]
+                                local distance = math.floor((hrp.Position - localPos).Magnitude)
+                                local screenPos, onScreen = camera:WorldToViewportPoint(hrp.Position - Vector3.new(0, 3, 0))
+                                
+                                if onScreen then
+                                    data.label.Position = Vector2.new(screenPos.X, screenPos.Y)
+                                    data.label.Text = tostring(distance) .. "m"
+                                    data.label.Color = DistanceSettings.SurvivorColor
+                                    data.label.Visible = true
+                                else
+                                    data.label.Visible = false
+                                end
                             end
                         end
                     end
                 end
-            end
-        else
-            -- 隐藏所有幸存者标签
-            for model, data in pairs(getgenv().distanceUnderFeetLabels or {}) do
-                if data.type == "Survivor" then
-                    data.label.Visible = false
+            else
+                -- 隐藏所有幸存者标签
+                for model, data in pairs(getgenv().distanceUnderFeetLabels or {}) do
+                    if data.type == "Survivor" then
+                        data.label.Visible = false
+                    end
                 end
             end
-        end
-        
-        -- 处理杀手
-        if DistanceSettings.ShowKillers then
-            local killers = workspace.Players:FindFirstChild("Killers")
-            if killers then
-                for _, killer in ipairs(killers:GetChildren()) do
-                    if killer:IsA("Model") then
-                        local hrp = killer:FindFirstChild("HumanoidRootPart")
-                        if hrp then
-                            if not getgenv().distanceUnderFeetLabels[killer] then
-                                getgenv().distanceUnderFeetLabels[killer] = {
-                                    label = Drawing.new("Text"),
-                                    type = "Killer"
-                                }
-                                local label = getgenv().distanceUnderFeetLabels[killer].label
-                                label.Size = DistanceSettings.TextSize
-                                label.Center = true
-                                label.Outline = true
-                                label.Font = 2
-                            end
-                            
-                            local data = getgenv().distanceUnderFeetLabels[killer]
-                            local distance = math.floor((hrp.Position - localPos).Magnitude)
-                            local screenPos, onScreen = camera:WorldToViewportPoint(hrp.Position - Vector3.new(0, 3, 0))
-                            
-                            if onScreen then
-                                data.label.Position = Vector2.new(screenPos.X, screenPos.Y)
-                                data.label.Text = tostring(distance) .. "m"
-                                data.label.Color = DistanceSettings.KillerColor
-                                data.label.Visible = true
-                            else
-                                data.label.Visible = false
+            
+            -- 处理杀手
+            if DistanceSettings.ShowKillers then
+                local killers = workspace.Players:FindFirstChild("Killers")
+                if killers then
+                    for _, killer in ipairs(killers:GetChildren()) do
+                        if killer:IsA("Model") then
+                            local hrp = killer:FindFirstChild("HumanoidRootPart")
+                            if hrp then
+                                if not getgenv().distanceUnderFeetLabels[killer] then
+                                    getgenv().distanceUnderFeetLabels[killer] = {
+                                        label = Drawing.new("Text"),
+                                        type = "Killer"
+                                    }
+                                    local label = getgenv().distanceUnderFeetLabels[killer].label
+                                    label.Size = DistanceSettings.TextSize
+                                    label.Center = true
+                                    label.Outline = true
+                                    label.Font = 2
+                                end
+                                
+                                local data = getgenv().distanceUnderFeetLabels[killer]
+                                local distance = math.floor((hrp.Position - localPos).Magnitude)
+                                local screenPos, onScreen = camera:WorldToViewportPoint(hrp.Position - Vector3.new(0, 3, 0))
+                                
+                                if onScreen then
+                                    data.label.Position = Vector2.new(screenPos.X, screenPos.Y)
+                                    data.label.Text = tostring(distance) .. "m"
+                                    data.label.Color = DistanceSettings.KillerColor
+                                    data.label.Visible = true
+                                else
+                                    data.label.Visible = false
+                                end
                             end
                         end
                     end
                 end
-            end
-        else
-            -- 隐藏所有杀手标签
-            for model, data in pairs(getgenv().distanceUnderFeetLabels or {}) do
-                if data.type == "Killer" then
-                    data.label.Visible = false
+            else
+                -- 隐藏所有杀手标签
+                for model, data in pairs(getgenv().distanceUnderFeetLabels or {}) do
+                    if data.type == "Killer" then
+                        data.label.Visible = false
+                    end
                 end
             end
+        end)
+        
+        -- 监听角色移除
+        getgenv().characterRemovedConnection = workspace.Players.DescendantRemoving:Connect(function(descendant)
+            if descendant:IsA("Model") and getgenv().distanceUnderFeetLabels and getgenv().distanceUnderFeetLabels[descendant] then
+                getgenv().distanceUnderFeetLabels[descendant].label:Remove()
+                getgenv().distanceUnderFeetLabels[descendant] = nil
+            end
+        end)
+    end
+
+    local Toggle8 = Tab5:Toggle({
+        Title = "绘制幸存者距离",
+        Desc = "FIN",
+        Locked = false,
+        Callback = function(enabled)
+            DistanceSettings.ShowSurvivors = enabled
+            if getgenv().distanceUnderFeetConnection then
+                updateDistanceDisplay()
+            end
         end
-    end)
-    
-    -- 监听角色移除
-    getgenv().characterRemovedConnection = workspace.Players.DescendantRemoving:Connect(function(descendant)
-        if descendant:IsA("Model") and getgenv().distanceUnderFeetLabels and getgenv().distanceUnderFeetLabels[descendant] then
-            getgenv().distanceUnderFeetLabels[descendant].label:Remove()
-            getgenv().distanceUnderFeetLabels[descendant] = nil
+    })
+
+    local Toggle9 = Tab5:Toggle({
+        Title = "绘制杀手距离", -- 修正了标题
+        Desc = "FIN",
+        Locked = false,
+        Callback = function(enabled)
+            DistanceSettings.ShowKillers = enabled
+            if getgenv().distanceUnderFeetConnection then
+                updateDistanceDisplay()
+            end
         end
-    end)
+    })
 end
-
-local Toggle8 = Tab5:Toggle({
-        Title = "绘制幸存者距离",
-        Desc = "FIN",
-        Locked = false,
-        Callback = function(enabled)
-        DistanceSettings.ShowSurvivors = enabled
-        if getgenv().distanceUnderFeetConnection then
-            updateDistanceDisplay()
-        end
-    end
-})
-
-local Toggle9 = Tab5:Toggle({
-        Title = "绘制幸存者距离",
-        Desc = "FIN",
-        Locked = false,
-        Callback = function(enabled)
-        DistanceSettings.ShowKillers = enabled
-        if getgenv().distanceUnderFeetConnection then
-            updateDistanceDisplay()
-        end
-    end
-})
