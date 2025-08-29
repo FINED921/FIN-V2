@@ -1361,6 +1361,6 @@ end
     Desc = "XP",
     Locked = false,
     Callback = function()
-    
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/FINED921/qq-155723303/refs/heads/main/FIN%20false%20defense"))()
     end
 })
