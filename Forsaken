@@ -1240,71 +1240,98 @@ local Toggle13 = Tab5:Toggle({
         end
     end
 })
+
 local Tab6 = Window:Tab({
-        Title = "VIP动作🤑",
-        Icon = "drama",
-        Locked = false,
-    })
+    Title = "VIP动作🤑",
+    Icon = "drama",
+    Locked = false,
+})
 
 local Toggle14 = Tab6:Toggle({
-        Title = "VIP动作",
-        Desc = "新版",
-        Locked = false,
-        Callback = function(state)
+    Title = "VIP动作",
+    Desc = "新版",
+    Locked = false,
+    Callback = function(state)
         local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
         local humanoid = char:WaitForChild("Humanoid")
         local rootPart = char:WaitForChild("HumanoidRootPart")
         
         if state then
-            -- 激活状态（完整实现）
+            -- 存储原始值以便恢复
+            local originalJumpPower = humanoid.JumpPower
+            local originalPlatformStand = humanoid.PlatformStand
+            
+            -- 激活状态
             humanoid.PlatformStand = true
             humanoid.JumpPower = 0
             
             local bodyVelocity = Instance.new("BodyVelocity")
             bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
-            bodyVelocity.Velocity = Vector3.zero
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
             bodyVelocity.Parent = rootPart
             
             local animation = Instance.new("Animation")
-            animation.AnimationId = "rbxassetid://138019937280193"
+            animation.AnimationId = "rbxassetid://138019937280193"  -- 确保这个ID是正确的
             local animationTrack = humanoid:LoadAnimation(animation)
             animationTrack:Play()
             
             local sound = Instance.new("Sound")
-            sound.SoundId = "rbxassetid://109474987384441"
+            sound.SoundId = "rbxassetid://109474987384441"  -- 确保这个ID是正确的
             sound.Parent = rootPart
             sound.Volume = 0.5
             sound.Looped = true
             sound:Play()
             
-            local effect = game:GetService("ReplicatedStorage").Assets.Emotes.HakariDance.HakariBeamEffect:Clone()
-            effect.Name = "PlayerEmoteVFX"
-            effect.CFrame = char.PrimaryPart.CFrame * CFrame.new(0, -1, -0.3)
-            effect.WeldConstraint.Part0 = char.PrimaryPart
-            effect.WeldConstraint.Part1 = effect
-            effect.Parent = char
-            effect.CanCollide = false
+            -- 检查特效路径是否存在
+            local replicatedStorage = game:GetService("ReplicatedStorage")
+            if replicatedStorage:FindFirstChild("Assets") and
+               replicatedStorage.Assets:FindFirstChild("Emotes") and
+               replicatedStorage.Assets.Emotes:FindFirstChild("HakariDance") and
+               replicatedStorage.Assets.Emotes.HakariDance:FindFirstChild("HakariBeamEffect") then
+                
+                local effect = replicatedStorage.Assets.Emotes.HakariDance.HakariBeamEffect:Clone()
+                effect.Name = "PlayerEmoteVFX"
+                effect.CFrame = rootPart.CFrame * CFrame.new(0, -1, -0.3)
+                
+                -- 确保有WeldConstraint
+                if effect:FindFirstChildOfClass("WeldConstraint") then
+                    effect.WeldConstraint.Part0 = rootPart
+                    effect.WeldConstraint.Part1 = effect
+                end
+                
+                effect.Parent = char
+                effect.CanCollide = false
+            end
             
-            local args = {
-                [1] = "PlayEmote",
-                [2] = "Animations",
-                [3] = "HakariDance"
-            }
-            game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("Network"):WaitForChild("RemoteEvent"):FireServer(unpack(args))
+            -- 发送网络事件
+            local networkModule = replicatedStorage:FindFirstChild("Modules")
+            if networkModule then
+                local network = networkModule:FindFirstChild("Network")
+                if network then
+                    local remoteEvent = network:FindFirstChild("RemoteEvent")
+                    if remoteEvent then
+                        remoteEvent:FireServer("PlayEmote", "Animations", "HakariDance")
+                    end
+                end
+            end
             
+            -- 动画停止时的处理
             animationTrack.Stopped:Connect(function()
-                humanoid.PlatformStand = false
+                humanoid.PlatformStand = originalPlatformStand
+                humanoid.JumpPower = originalJumpPower
                 if bodyVelocity and bodyVelocity.Parent then
                     bodyVelocity:Destroy()
                 end
             end)
         else
-            -- 关闭状态（完整实现）
+            -- 关闭状态
             humanoid.PlatformStand = false
-            humanoid.JumpPower = 0
+            humanoid.JumpPower = 50  -- 恢复默认跳跃力
             
             local bodyVelocity = rootPart:FindFirstChildOfClass("BodyVelocity")
-            if bodyVelocity then bodyVelocity:Destroy() end
+            if bodyVelocity then
+                bodyVelocity:Destroy()
+            end
             
             local sound = rootPart:FindFirstChildOfClass("Sound")
             if sound then
@@ -1313,7 +1340,9 @@ local Toggle14 = Tab6:Toggle({
             end
             
             local effect = char:FindFirstChild("PlayerEmoteVFX")
-            if effect then effect:Destroy() end
+            if effect then
+                effect:Destroy()
+            end
             
             for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
                 if track.Animation.AnimationId == "rbxassetid://138019937280193" then
@@ -1325,22 +1354,26 @@ local Toggle14 = Tab6:Toggle({
 })
 
 local Toggle15 = Tab6:Toggle({
-        Title = "VIP动作",
-        Desc = "旧版",
-        Locked = false,
-        Callback = function(state)
+    Title = "VIP动作",
+    Desc = "旧版",
+    Locked = false,
+    Callback = function(state)
         local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
         local humanoid = char:WaitForChild("Humanoid")
         local rootPart = char:WaitForChild("HumanoidRootPart")
         
         if state then
-            -- 激活状态（完整实现）
+            -- 存储原始值以便恢复
+            local originalJumpPower = humanoid.JumpPower
+            local originalPlatformStand = humanoid.PlatformStand
+            
+            -- 激活状态
             humanoid.PlatformStand = true
             humanoid.JumpPower = 0
             
             local bodyVelocity = Instance.new("BodyVelocity")
             bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
-            bodyVelocity.Velocity = Vector3.zero
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
             bodyVelocity.Parent = rootPart
             
             local animation = Instance.new("Animation")
@@ -1349,40 +1382,62 @@ local Toggle15 = Tab6:Toggle({
             animationTrack:Play()
             
             local sound = Instance.new("Sound")
-            sound.SoundId = "rbxassetid://87166578676888"
+            sound.SoundId = "rbxassetid://87166578676888"  -- 不同的声音ID
             sound.Parent = rootPart
             sound.Volume = 0.5
             sound.Looped = true
             sound:Play()
             
-            local effect = game:GetService("ReplicatedStorage").Assets.Emotes.HakariDance.HakariBeamEffect:Clone()
-            effect.Name = "PlayerEmoteVFX"
-            effect.CFrame = char.PrimaryPart.CFrame * CFrame.new(0, -1, -0.3)
-            effect.WeldConstraint.Part0 = char.PrimaryPart
-            effect.WeldConstraint.Part1 = effect
-            effect.Parent = char
-            effect.CanCollide = false
+            -- 检查特效路径是否存在
+            local replicatedStorage = game:GetService("ReplicatedStorage")
+            if replicatedStorage:FindFirstChild("Assets") and
+               replicatedStorage.Assets:FindFirstChild("Emotes") and
+               replicatedStorage.Assets.Emotes:FindFirstChild("HakariDance") and
+               replicatedStorage.Assets.Emotes.HakariDance:FindFirstChild("HakariBeamEffect") then
+                
+                local effect = replicatedStorage.Assets.Emotes.HakariDance.HakariBeamEffect:Clone()
+                effect.Name = "PlayerEmoteVFX"
+                effect.CFrame = rootPart.CFrame * CFrame.new(0, -1, -0.3)
+                
+                -- 确保有WeldConstraint
+                if effect:FindFirstChildOfClass("WeldConstraint") then
+                    effect.WeldConstraint.Part0 = rootPart
+                    effect.WeldConstraint.Part1 = effect
+                end
+                
+                effect.Parent = char
+                effect.CanCollide = false
+            end
             
-            local args = {
-                [1] = "PlayEmote",
-                [2] = "Animations",
-                [3] = "HakariDance"
-            }
-            game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("Network"):WaitForChild("RemoteEvent"):FireServer(unpack(args))
+            -- 发送网络事件
+            local networkModule = replicatedStorage:FindFirstChild("Modules")
+            if networkModule then
+                local network = networkModule:FindFirstChild("Network")
+                if network then
+                    local remoteEvent = network:FindFirstChild("RemoteEvent")
+                    if remoteEvent then
+                        remoteEvent:FireServer("PlayEmote", "Animations", "HakariDance")
+                    end
+                end
+            end
             
+            -- 动画停止时的处理
             animationTrack.Stopped:Connect(function()
-                humanoid.PlatformStand = false
+                humanoid.PlatformStand = originalPlatformStand
+                humanoid.JumpPower = originalJumpPower
                 if bodyVelocity and bodyVelocity.Parent then
                     bodyVelocity:Destroy()
                 end
             end)
         else
-            -- 关闭状态（完整实现）
+            -- 关闭状态
             humanoid.PlatformStand = false
-            humanoid.JumpPower = 0
+            humanoid.JumpPower = 50  -- 恢复默认跳跃力
             
             local bodyVelocity = rootPart:FindFirstChildOfClass("BodyVelocity")
-            if bodyVelocity then bodyVelocity:Destroy() end
+            if bodyVelocity then
+                bodyVelocity:Destroy()
+            end
             
             local sound = rootPart:FindFirstChildOfClass("Sound")
             if sound then
@@ -1391,7 +1446,9 @@ local Toggle15 = Tab6:Toggle({
             end
             
             local effect = char:FindFirstChild("PlayerEmoteVFX")
-            if effect then effect:Destroy() end
+            if effect then
+                effect:Destroy()
+            end
             
             for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
                 if track.Animation.AnimationId == "rbxassetid://138019937280193" then
