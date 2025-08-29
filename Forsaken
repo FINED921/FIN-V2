@@ -364,7 +364,7 @@ function createMainWindow()
         Locked = false,
     })
 
-local Button = Tab:Button({
+local Button = Tab5:Button({
     Title = "一键绘制",
     Desc = "绘制幸存者 杀手 发电机",
     Locked = false,
@@ -897,114 +897,146 @@ end
             end
         end
     })
-end
 
--- 清理高亮对象
-local function cleanupHighlights()
-    for _, highlight in pairs(HighlightSettings.highlights) do
-        if highlight and highlight.Parent then
-            highlight:Destroy()
+    -- 高亮设置
+    local HighlightSettings = {
+        ShowSurvivorHighlights = true,
+        ShowKillerHighlights = true,
+        FillTransparency = 0.5,
+        OutlineTransparency = 0,
+        SurvivorColors = {
+            Blue = Color3.fromRGB(0, 120, 255),
+            Green = Color3.fromRGB(0, 255, 0),
+            Yellow = Color3.fromRGB(255, 255, 0)
+        },
+        KillerColors = {
+            Red = Color3.fromRGB(255, 0, 0),
+            Purple = Color3.fromRGB(255, 0, 255),
+            Orange = Color3.fromRGB(255, 128, 0)
+        },
+        SurvivorOutlineColors = {
+            White = Color3.fromRGB(255, 255, 255),
+            Black = Color3.fromRGB(0, 0, 0)
+        },
+        KillerOutlineColors = {
+            White = Color3.fromRGB(255, 255, 255),
+            Black = Color3.fromRGB(0, 0, 0)
+        },
+        SelectedSurvivorColor = "Blue",
+        SelectedKillerColor = "Red",
+        SelectedSurvivorOutlineColor = "White",
+        SelectedKillerOutlineColor = "White",
+        highlights = {},
+        connection = nil
+    }
+
+    -- 清理高亮对象
+    local function cleanupHighlights()
+        for _, highlight in pairs(HighlightSettings.highlights) do
+            if highlight and highlight.Parent then
+                highlight:Destroy()
+            end
         end
+        HighlightSettings.highlights = {}
     end
-    HighlightSettings.highlights = {}
-end
 
--- 更新高亮显示
-local function updateHighlights()
-    local players = game:GetService("Players")
-    local localPlayer = players.LocalPlayer
-    
-    -- 获取幸存者和杀手文件夹
-    local survivorsFolder = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Survivors")
-    local killersFolder = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Killers")
-    
-    -- 只处理幸存者和杀手
-    local function processFolder(folder, isKiller)
-        if not folder then return end
+    -- 更新高亮显示
+    local function updateHighlights()
+        local players = game:GetService("Players")
+        local localPlayer = players.LocalPlayer
         
-        for _, model in ipairs(folder:GetChildren()) do
-            if model:IsA("Model") then
-                -- 确定颜色
-                local fillColor = isKiller and HighlightSettings.KillerColors[HighlightSettings.SelectedKillerColor] 
-                                          or HighlightSettings.SurvivorColors[HighlightSettings.SelectedSurvivorColor]
-                
-                local outlineColor = isKiller and HighlightSettings.KillerOutlineColors[HighlightSettings.SelectedKillerOutlineColor] 
-                                              or HighlightSettings.SurvivorOutlineColors[HighlightSettings.SelectedSurvivorOutlineColor]
-                
-                -- 根据设置决定是否显示
-                if (isKiller and HighlightSettings.ShowKillerHighlights) or 
-                   (not isKiller and HighlightSettings.ShowSurvivorHighlights) then
+        -- 获取幸存者和杀手文件夹
+        local survivorsFolder = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Survivors")
+        local killersFolder = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Killers")
+        
+        -- 只处理幸存者和杀手
+        local function processFolder(folder, isKiller)
+            if not folder then return end
+            
+            for _, model in ipairs(folder:GetChildren()) do
+                if model:IsA("Model") then
+                    -- 确定颜色
+                    local fillColor = isKiller and HighlightSettings.KillerColors[HighlightSettings.SelectedKillerColor] 
+                                              or HighlightSettings.SurvivorColors[HighlightSettings.SelectedSurvivorColor]
                     
-                    if not HighlightSettings.highlights[model] then
-                        local highlight = Instance.new("Highlight")
-                        highlight.Parent = game.CoreGui
-                        HighlightSettings.highlights[model] = highlight
+                    local outlineColor = isKiller and HighlightSettings.KillerOutlineColors[HighlightSettings.SelectedKillerOutlineColor] 
+                                                  or HighlightSettings.SurvivorOutlineColors[HighlightSettings.SelectedSurvivorOutlineColor]
+                    
+                    -- 根据设置决定是否显示
+                    if (isKiller and HighlightSettings.ShowKillerHighlights) or 
+                       (not isKiller and HighlightSettings.ShowSurvivorHighlights) then
+                        
+                        if not HighlightSettings.highlights[model] then
+                            local highlight = Instance.new("Highlight")
+                            highlight.Parent = game.CoreGui
+                            HighlightSettings.highlights[model] = highlight
+                        end
+                        
+                        local highlight = HighlightSettings.highlights[model]
+                        highlight.Adornee = model
+                        highlight.FillColor = fillColor
+                        highlight.OutlineColor = outlineColor
+                        highlight.FillTransparency = HighlightSettings.FillTransparency
+                        highlight.OutlineTransparency = HighlightSettings.OutlineTransparency
+                    elseif HighlightSettings.highlights[model] then
+                        HighlightSettings.highlights[model].Adornee = nil
                     end
-                    
-                    local highlight = HighlightSettings.highlights[model]
-                    highlight.Adornee = model
-                    highlight.FillColor = fillColor
-                    highlight.OutlineColor = outlineColor
-                    highlight.FillTransparency = HighlightSettings.FillTransparency
-                    highlight.OutlineTransparency = HighlightSettings.OutlineTransparency
-                elseif HighlightSettings.highlights[model] then
-                    HighlightSettings.highlights[model].Adornee = nil
                 end
             end
         end
-    end
-    
-    -- 处理幸存者
-    processFolder(survivorsFolder, false)
-    
-    -- 处理杀手
-    processFolder(killersFolder, true)
-    
-    -- 清理不再存在的模型的高亮
-    for model, highlight in pairs(HighlightSettings.highlights) do
-        if not model or not model.Parent then
-            highlight:Destroy()
-            HighlightSettings.highlights[model] = nil
+        
+        -- 处理幸存者
+        processFolder(survivorsFolder, false)
+        
+        -- 处理杀手
+        processFolder(killersFolder, true)
+        
+        -- 清理不再存在的模型的高亮
+        for model, highlight in pairs(HighlightSettings.highlights) do
+            if not model or not model.Parent then
+                highlight:Destroy()
+                HighlightSettings.highlights[model] = nil
+            end
         end
     end
+
+    local Toggle10 = Tab5:Toggle({
+        Title = "启动绘制",
+        Desc = "FIN",
+        Locked = false,
+        Callback = function(enabled)
+            if enabled then
+                -- 初始化连接
+                if not HighlightSettings.connection then
+                    HighlightSettings.connection = game:GetService("RunService").RenderStepped:Connect(updateHighlights)
+                end
+            else
+                -- 关闭连接
+                if HighlightSettings.connection then
+                    HighlightSettings.connection:Disconnect()
+                    HighlightSettings.connection = nil
+                end
+                -- 清理高亮对象
+                cleanupHighlights()
+            end
+        end
+    })
+
+    local Toggle11 = Tab5:Toggle({
+        Title = "绘制幸存者",
+        Desc = "FIN",
+        Locked = false,
+        Callback = function(enabled)
+            HighlightSettings.ShowSurvivorHighlights = enabled
+        end
+    })
+
+    local Toggle12 = Tab5:Toggle({
+        Title = "绘制杀手", 
+        Desc = "FIN",
+        Locked = false,
+        Callback = function(enabled)
+            HighlightSettings.ShowKillerHighlights = enabled
+        end
+    })
 end
-
-local Toggle10 = Tab5:Toggle({
-        Title = "绘制总开关",
-        Desc = "FIN",
-        Locked = false,
-        Callback = function(enabled)
-        if enabled then
-            -- 初始化连接
-            if not HighlightSettings.connection then
-                HighlightSettings.connection = game:GetService("RunService").RenderStepped:Connect(updateHighlights)
-            end
-        else
-            -- 关闭连接
-            if HighlightSettings.connection then
-                HighlightSettings.connection:Disconnect()
-                HighlightSettings.connection = nil
-            end
-            -- 清理高亮对象
-            cleanupHighlights()
-        end
-    end
-})
-
-local Toggle11 = Tab5:Toggle({
-        Title = "绘制幸存者",
-        Desc = "FIN",
-        Locked = false,
-        Callback = function(enabled)
-        HighlightSettings.ShowSurvivorHighlights = enabled
-    end
-})
-
-local Toggle12 = Tab5:Toggle({
-        Title = "绘制幸存者",
-        Desc = "FIN",
-        Locked = false,
-        Callback = function(enabled)
-        HighlightSettings.ShowKillerHighlights = enabled
-    end
-})
