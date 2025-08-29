@@ -162,6 +162,22 @@ function createMainWindow()
         Locked = false,
     })
 
+    -- 辅助函数：递归查找子对象
+    local function findFirstChildRecursive(parent, name)
+        if parent.Name == name then
+            return parent
+        end
+        
+        for _, child in ipairs(parent:GetChildren()) do
+            local result = findFirstChildRecursive(child, name)
+            if result then
+                return result
+            end
+        end
+        
+        return nil
+    end
+
     local Toggle3 = Tab3:Toggle({
         Title = "医疗包传送且获取",
         Desc = "FIN",
@@ -176,21 +192,16 @@ function createMainWindow()
                         if character and character:FindFirstChild("HumanoidRootPart") then
                             local humanoidRootPart = character.HumanoidRootPart
                             
-                            local medkit = workspace:FindFirstChild("Map", true)
+                            -- 使用递归查找
+                            local medkit = findFirstChildRecursive(workspace, "Medkit")
                             if medkit then
-                                medkit = medkit:FindFirstChild("Ingame", true)
-                                if medkit then
-                                    medkit = medkit:FindFirstChild("Medkit", true)
-                                    if medkit then
-                                        local itemRoot = medkit:FindFirstChild("ItemRoot", true)
-                                        if itemRoot then
-                                            itemRoot.CFrame = humanoidRootPart.CFrame + humanoidRootPart.CFrame.LookVector * 3
-                                            
-                                            local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
-                                            if prompt then
-                                                fireproximityprompt(prompt)
-                                            end
-                                        end
+                                local itemRoot = findFirstChildRecursive(medkit, "ItemRoot")
+                                if itemRoot then
+                                    itemRoot.CFrame = humanoidRootPart.CFrame + humanoidRootPart.CFrame.LookVector * 3
+                                    
+                                    local prompt = itemRoot:FindFirstChild("ProximityPrompt")
+                                    if prompt then
+                                        fireproximityprompt(prompt)
                                     end
                                 end
                             end
@@ -218,21 +229,16 @@ function createMainWindow()
                         if character and character:FindFirstChild("HumanoidRootPart") then
                             local humanoidRootPart = character.HumanoidRootPart
                             
-                            local cola = workspace:FindFirstChild("Map", true)
+                            -- 使用递归查找
+                            local cola = findFirstChildRecursive(workspace, "BloxyCola")
                             if cola then
-                                cola = cola:FindFirstChild("Ingame", true)
-                                if cola then
-                                    cola = cola:FindFirstChild("BloxyCola", true)
-                                    if cola then
-                                        local itemRoot = cola:FindFirstChild("ItemRoot", true)
-                                        if itemRoot then
-                                            itemRoot.CFrame = humanoidRootPart.CFrame + humanoidRootPart.CFrame.LookVector * 3
-                                            
-                                            local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
-                                            if prompt then
-                                                fireproximityprompt(prompt)
-                                            end
-                                        end
+                                local itemRoot = findFirstChildRecursive(cola, "ItemRoot")
+                                if itemRoot then
+                                    itemRoot.CFrame = humanoidRootPart.CFrame + humanoidRootPart.CFrame.LookVector * 3
+                                    
+                                    local prompt = itemRoot:FindFirstChild("ProximityPrompt")
+                                    if prompt then
+                                        fireproximityprompt(prompt)
                                     end
                                 end
                             end
@@ -256,19 +262,14 @@ function createMainWindow()
             if autoMedkitEnabled then
                 medkitThread = task.spawn(function()
                     while autoMedkitEnabled and task.wait(0.5) do
-                        local medkit = workspace:FindFirstChild("Map", true)
+                        -- 使用递归查找
+                        local medkit = findFirstChildRecursive(workspace, "Medkit")
                         if medkit then
-                            medkit = medkit:FindFirstChild("Ingame", true)
-                            if medkit then
-                                medkit = medkit:FindFirstChild("Medkit", true)
-                                if medkit then
-                                    local itemRoot = medkit:FindFirstChild("ItemRoot", true)
-                                    if itemRoot then
-                                        local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
-                                        if prompt then
-                                            fireproximityprompt(prompt)
-                                        end
-                                    end
+                            local itemRoot = findFirstChildRecursive(medkit, "ItemRoot")
+                            if itemRoot then
+                                local prompt = itemRoot:FindFirstChild("ProximityPrompt")
+                                if prompt then
+                                    fireproximityprompt(prompt)
                                 end
                             end
                         end
@@ -291,19 +292,14 @@ function createMainWindow()
             if autoColaEnabled then
                 colaThread = task.spawn(function()
                     while autoColaEnabled and task.wait(0.5) do
-                        local cola = workspace:FindFirstChild("Map", true)
+                        -- 使用递归查找
+                        local cola = findFirstChildRecursive(workspace, "BloxyCola")
                         if cola then
-                            cola = cola:FindFirstChild("Ingame", true)
-                            if cola then
-                                cola = cola:FindFirstChild("BloxyCola", true)
-                                if cola then
-                                    local itemRoot = cola:FindFirstChild("ItemRoot", true)
-                                    if itemRoot then
-                                        local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
-                                        if prompt then
-                                            fireproximityprompt(prompt)
-                                        end
-                                    end
+                            local itemRoot = findFirstChildRecursive(cola, "ItemRoot")
+                            if itemRoot then
+                                local prompt = itemRoot:FindFirstChild("ProximityPrompt")
+                                if prompt then
+                                    fireproximityprompt(prompt)
                                 end
                             end
                         end
@@ -364,368 +360,355 @@ function createMainWindow()
         Locked = false,
     })
 
-local Button = Tab5:Button({
-    Title = "一键绘制",
-    Desc = "绘制幸存者 杀手 发电机",
-    Locked = false,
-    Callback = function()
-    local sur = workspace.Players.Survivors
-local kil = workspace.Players.Killers
-local spe = workspace.Players.Spectating
-local ing = workspace.Map.Ingame
+    local Button = Tab5:Button({
+        Title = "一键绘制",
+        Desc = "绘制幸存者 杀手 发电机",
+        Locked = false,
+        Callback = function()
+            local sur = workspace.Players.Survivors
+            local kil = workspace.Players.Killers
+            local spe = workspace.Players.Spectating
+            local ing = workspace.Map.Ingame
 
-print("By Syndrome")
+            print("By Syndrome")
 
-local function survivoresp(char)
-local billboard = Instance.new("BillboardGui")
-billboard.Size = UDim2.new(2, 0, 0.5, 0) 
-billboard.StudsOffset = Vector3.new(0, 1.25, 0) 
-billboard.Adornee = char.Head
-billboard.Parent = char.Head
-billboard.AlwaysOnTop = true
-local textLabel = Instance.new("TextLabel")
-textLabel.Size = UDim2.new(1, 0, 1, 0)
-textLabel.Position = UDim2.new(0, 1, 0, 1)
-textLabel.BackgroundTransparency = 1
-textLabel.TextScaled = true
-textLabel.Text = "血量: "..char.Humanoid.Health.."/"..char.Humanoid.MaxHealth 
-textLabel.TextColor3 = Color3.fromRGB(255, 100, 28)
-textLabel.Font = Enum.Font.Arcade
-textLabel.Parent = billboard
+            local function survivoresp(char)
+                local billboard = Instance.new("BillboardGui")
+                billboard.Size = UDim2.new(2, 0, 0.5, 0) 
+                billboard.StudsOffset = Vector3.new(0, 1.25, 0) 
+                billboard.Adornee = char.Head
+                billboard.Parent = char.Head
+                billboard.AlwaysOnTop = true
+                local textLabel = Instance.new("TextLabel")
+                textLabel.Size = UDim2.new(1, 0, 1, 0)
+                textLabel.Position = UDim2.new(0, 1, 0, 1)
+                textLabel.BackgroundTransparency = 1
+                textLabel.TextScaled = true
+                textLabel.Text = "血量: "..char.Humanoid.Health.."/"..char.Humanoid.MaxHealth 
+                textLabel.TextColor3 = Color3.fromRGB(255, 100, 28)
+                textLabel.Font = Enum.Font.Arcade
+                textLabel.Parent = billboard
 
-local charnamebill = Instance.new("BillboardGui")
-charnamebill.Size = UDim2.new(9, 0, 1, 0) 
-charnamebill.StudsOffset = Vector3.new(0, 2, 0) 
-charnamebill.Adornee = char.Head
-charnamebill.Parent = char.Head
-charnamebill.AlwaysOnTop = true
-local charnametext = Instance.new("TextLabel")
-charnametext.Size = UDim2.new(1, 0, 1, 0)
-charnametext.Position = UDim2.new(0, 1, 0, 1)
-charnametext.BackgroundTransparency = 1
-charnametext.TextScaled = true
-charnametext.Text = char.Name
-charnametext.TextColor3 = Color3.fromRGB(255, 100, 28)
-charnametext.Font = Enum.Font.Arcade
-charnametext.Parent = charnamebill
+                local charnamebill = Instance.new("BillboardGui")
+                charnamebill.Size = UDim2.new(9, 0, 1, 0) 
+                charnamebill.StudsOffset = Vector3.new(0, 2, 0) 
+                charnamebill.Adornee = char.Head
+                charnamebill.Parent = char.Head
+                charnamebill.AlwaysOnTop = true
+                local charnametext = Instance.new("TextLabel")
+                charnametext.Size = UDim2.new(1, 0, 1, 0)
+                charnametext.Position = UDim2.new(0, 1, 0, 1)
+                charnametext.BackgroundTransparency = 1
+                charnametext.TextScaled = true
+                charnametext.Text = char.Name
+                charnametext.TextColor3 = Color3.fromRGB(255, 100, 28)
+                charnametext.Font = Enum.Font.Arcade
+                charnametext.Parent = charnamebill
 
-local highlight = Instance.new("Highlight", char)
-highlight.Archivable = true
-highlight.DepthMode = "AlwaysOnTop"
-highlight.Enabled = true
-highlight.OutlineColor= Color3.fromRGB(255, 100, 28)
-highlight.FillColor= Color3.fromRGB(255, 100, 28)
-highlight.FillTransparency = 0.9
-highlight.OutlineTransparency = 0
-highlight.Parent = char
+                local highlight = Instance.new("Highlight")
+                highlight.Archivable = true
+                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                highlight.Enabled = true
+                highlight.OutlineColor = Color3.fromRGB(255, 100, 28)
+                highlight.FillColor = Color3.fromRGB(255, 100, 28)
+                highlight.FillTransparency = 0.9
+                highlight.OutlineTransparency = 0
+                highlight.Parent = char
 
+                local temp = char:FindFirstChild("Humanoid").HealthChanged:Connect(function()
+                    textLabel.Text = "血量: "..char:FindFirstChild("Humanoid").Health.."/"..char:FindFirstChild("Humanoid").MaxHealth
+                end)
 
-local temp = char:FindFirstChild("Humanoid").HealthChanged:Connect(function()
-	textLabel.Text = "血量: "..char:FindFirstChild("Humanoid").Health.."/"..char:FindFirstChild("Humanoid").MaxHealth
-end)
+                char:FindFirstChild("Humanoid").Died:Connect(function()
+                    temp:Disconnect()
+                    textLabel.Text = ""
+                    charnametext.Text = ""
+                    highlight.OutlineTransparency = 1
+                end)
 
-char:FindFirstChild("Humanoid").Died:Connect(function()
-	temp:Disconnect()
-	textLabel.Text = ""
-	charnametext.Text = ""
-	highlight.OutlineTransparency = 1
-end)
+                return textLabel
+            end
 
+            local function killeresp(char)
+                local billboard = Instance.new("BillboardGui")
+                billboard.Size = UDim2.new(2, 0, 0.5, 0) 
+                billboard.StudsOffset = Vector3.new(0, 1.25, 0) 
+                billboard.Adornee = char.Head
+                billboard.Parent = char.Head
+                billboard.AlwaysOnTop = true
+                local textLabel = Instance.new("TextLabel")
+                textLabel.Size = UDim2.new(1, 0, 1, 0)
+                textLabel.Position = UDim2.new(0, 1, 0, 1)
+                textLabel.BackgroundTransparency = 1
+                textLabel.TextScaled = true
+                textLabel.Text = "血量: "..char.Humanoid.Health.."/"..char.Humanoid.MaxHealth 
+                textLabel.TextColor3 = Color3.fromRGB(204, 0, 0)
+                textLabel.Font = Enum.Font.Arcade
+                textLabel.Parent = billboard
 
-return textLabel
+                local charnamebill = Instance.new("BillboardGui")
+                charnamebill.Size = UDim2.new(9, 0, 1, 0) 
+                charnamebill.StudsOffset = Vector3.new(0, 2, 0) 
+                charnamebill.Adornee = char.Head
+                charnamebill.Parent = char.Head
+                charnamebill.AlwaysOnTop = true
+                local charnametext = Instance.new("TextLabel")
+                charnametext.Size = UDim2.new(1, 0, 1, 0)
+                charnametext.Position = UDim2.new(0, 1, 0, 1)
+                charnametext.BackgroundTransparency = 1
+                charnametext.TextScaled = true
+                charnametext.Text = char.Name
+                charnametext.TextColor3 = Color3.fromRGB(204, 0, 0)
+                charnametext.Font = Enum.Font.Arcade
+                charnametext.Parent = charnamebill
 
-end
+                local highlight = Instance.new("Highlight")
+                highlight.Archivable = true
+                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                highlight.Enabled = true
+                highlight.OutlineColor = Color3.fromRGB(204, 0, 0)
+                highlight.FillColor = Color3.fromRGB(204, 0, 0)
+                highlight.FillTransparency = 0.9
+                highlight.OutlineTransparency = 0
+                highlight.Parent = char
 
-local function killeresp(char)
-local billboard = Instance.new("BillboardGui")
-billboard.Size = UDim2.new(2, 0, 0.5, 0) 
-billboard.StudsOffset = Vector3.new(0, 1.25, 0) 
-billboard.Adornee = char.Head
-billboard.Parent = char.Head
-billboard.AlwaysOnTop = true
-local textLabel = Instance.new("TextLabel")
-textLabel.Size = UDim2.new(1, 0, 1, 0)
-textLabel.Position = UDim2.new(0, 1, 0, 1)
-textLabel.BackgroundTransparency = 1
-textLabel.TextScaled = true
-textLabel.Text = "血量: "..char.Humanoid.Health.."/"..char.Humanoid.MaxHealth 
-textLabel.TextColor3 = Color3.fromRGB(204, 0, 0)
-textLabel.Font = Enum.Font.Arcade
-textLabel.Parent = billboard
+                local temp = char:FindFirstChild("Humanoid").HealthChanged:Connect(function()
+                    textLabel.Text = "血量: "..char:FindFirstChild("Humanoid").Health.."/"..char:FindFirstChild("Humanoid").MaxHealth
+                end)
 
-local charnamebill = Instance.new("BillboardGui")
-charnamebill.Size = UDim2.new(9, 0, 1, 0) 
-charnamebill.StudsOffset = Vector3.new(0, 2, 0) 
-charnamebill.Adornee = char.Head
-charnamebill.Parent = char.Head
-charnamebill.AlwaysOnTop = true
-local charnametext = Instance.new("TextLabel")
-charnametext.Size = UDim2.new(1, 0, 1, 0)
-charnametext.Position = UDim2.new(0, 1, 0, 1)
-charnametext.BackgroundTransparency = 1
-charnametext.TextScaled = true
-charnametext.Text = char.Name
-charnametext.TextColor3 = Color3.fromRGB(204, 0, 0)
-charnametext.Font = Enum.Font.Arcade
-charnametext.Parent = charnamebill
+                char:FindFirstChild("Humanoid").Died:Connect(function()
+                    temp:Disconnect()
+                    textLabel.Text = ""
+                    charnametext.Text = ""
+                    highlight.OutlineTransparency = 1
+                end)
 
-local highlight = Instance.new("Highlight", char)
-highlight.Archivable = true
-highlight.DepthMode = "AlwaysOnTop"
-highlight.Enabled = true
-highlight.OutlineColor= Color3.fromRGB(204, 0, 0)
-highlight.FillColor= Color3.fromRGB(204, 0, 0)
-highlight.FillTransparency = 0.9
-highlight.OutlineTransparency = 0
-highlight.Parent = char
+                return textLabel
+            end
 
+            local function specesp(char) 
+                local billboard = Instance.new("BillboardGui")
+                billboard.Size = UDim2.new(2, 0, 0.5, 0) 
+                billboard.StudsOffset = Vector3.new(0, 1.25, 0) 
+                billboard.Adornee = char.Head
+                billboard.Parent = char.Head
+                billboard.AlwaysOnTop = true
+                local textLabel = Instance.new("TextLabel")
+                textLabel.Size = UDim2.new(1, 0, 1, 0)
+                textLabel.Position = UDim2.new(0, 1, 0, 1)
+                textLabel.BackgroundTransparency = 1
+                textLabel.TextScaled = true
+                textLabel.Text = "血量: "..char.Humanoid.Health.."/"..char.Humanoid.MaxHealth 
+                textLabel.TextColor3 = Color3.fromRGB(117, 117, 117)
+                textLabel.Font = Enum.Font.Arcade
+                textLabel.Parent = billboard
 
-local temp = char:FindFirstChild("Humanoid").HealthChanged:Connect(function()
-	textLabel.Text = "血量: "..char:FindFirstChild("Humanoid").Health.."/"..char:FindFirstChild("Humanoid").MaxHealth
-end)
+                local charnamebill = Instance.new("BillboardGui")
+                charnamebill.Size = UDim2.new(9, 0, 1, 0) 
+                charnamebill.StudsOffset = Vector3.new(0, 2, 0) 
+                charnamebill.Adornee = char.Head
+                charnamebill.Parent = char.Head
+                charnamebill.AlwaysOnTop = true
+                local charnametext = Instance.new("TextLabel")
+                charnametext.Size = UDim2.new(1, 0, 1, 0)
+                charnametext.Position = UDim2.new(0, 1, 0, 1)
+                charnametext.BackgroundTransparency = 1
+                charnametext.TextScaled = true
+                charnametext.Text = char.Name
+                charnametext.TextColor3 = Color3.fromRGB(117, 117, 117)
+                charnametext.Font = Enum.Font.Arcade
+                charnametext.Parent = charnamebill
 
-char:FindFirstChild("Humanoid").Died:Connect(function()
-	temp:Disconnect()
-	textLabel.Text = ""
-	charnametext.Text = ""
-	highlight.OutlineTransparency = 1
-end)
+                local highlight = Instance.new("Highlight")
+                highlight.Archivable = true
+                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                highlight.Enabled = true
+                highlight.OutlineColor = Color3.fromRGB(117, 117, 117)
+                highlight.FillColor = Color3.fromRGB(117, 117, 117)
+                highlight.FillTransparency = 0.9
+                highlight.OutlineTransparency = 0
+                highlight.Parent = char
 
+                local temp = char:FindFirstChild("Humanoid").HealthChanged:Connect(function()
+                    textLabel.Text = "血量: "..char:FindFirstChild("Humanoid").Health.."/"..char:FindFirstChild("Humanoid").MaxHealth
+                end)
 
-return textLabel
+                char:FindFirstChild("Humanoid").Died:Connect(function()
+                    temp:Disconnect()
+                    textLabel.Text = ""
+                    charnametext.Text = ""
+                    highlight.OutlineTransparency = 1
+                end)
 
-end
+                return textLabel
+            end
 
-local function specesp(char) 
-local billboard = Instance.new("BillboardGui")
-billboard.Size = UDim2.new(2, 0, 0.5, 0) 
-billboard.StudsOffset = Vector3.new(0, 1.25, 0) 
-billboard.Adornee = char.Head
-billboard.Parent = char.Head
-billboard.AlwaysOnTop = true
-local textLabel = Instance.new("TextLabel")
-textLabel.Size = UDim2.new(1, 0, 1, 0)
-textLabel.Position = UDim2.new(0, 1, 0, 1)
-textLabel.BackgroundTransparency = 1
-textLabel.TextScaled = true
-textLabel.Text = "血量: "..char.Humanoid.Health.."/"..char.Humanoid.MaxHealth 
-textLabel.TextColor3 = Color3.fromRGB(117, 117, 117)
-textLabel.Font = Enum.Font.Arcade
-textLabel.Parent = billboard
+            local function genesp(p)
+                local billboard = Instance.new("BillboardGui")
+                billboard.Size = UDim2.new(2, 0, 0.5, 0) 
+                billboard.StudsOffset = Vector3.new(0, 1.25, 0) 
+                billboard.Adornee = p.Main
+                billboard.Parent = p.Main
+                billboard.AlwaysOnTop = true
+                local textLabel = Instance.new("TextLabel")
+                textLabel.Size = UDim2.new(1, 0, 1, 0)
+                textLabel.Position = UDim2.new(0, 1, 0, 1)
+                textLabel.BackgroundTransparency = 1
+                textLabel.TextScaled = true
+                textLabel.Text = ""
+                textLabel.TextColor3 = Color3.fromRGB(255, 206, 28)
+                textLabel.Font = Enum.Font.Arcade
+                textLabel.Parent = billboard
 
-local charnamebill = Instance.new("BillboardGui")
-charnamebill.Size = UDim2.new(9, 0, 1, 0) 
-charnamebill.StudsOffset = Vector3.new(0, 2, 0) 
-charnamebill.Adornee = char.Head
-charnamebill.Parent = char.Head
-charnamebill.AlwaysOnTop = true
-local charnametext = Instance.new("TextLabel")
-charnametext.Size = UDim2.new(1, 0, 1, 0)
-charnametext.Position = UDim2.new(0, 1, 0, 1)
-charnametext.BackgroundTransparency = 1
-charnametext.TextScaled = true
-charnametext.Text = char.Name
-charnametext.TextColor3 = Color3.fromRGB(117, 117, 117)
-charnametext.Font = Enum.Font.Arcade
-charnametext.Parent = charnamebill
+                local gennamebill = Instance.new("BillboardGui")
+                gennamebill.Size = UDim2.new(9, 0, 1, 0) 
+                gennamebill.StudsOffset = Vector3.new(0, 2, 0) 
+                gennamebill.Adornee = p.Main
+                gennamebill.Parent = p.Main
+                gennamebill.AlwaysOnTop = true
+                local gennametext = Instance.new("TextLabel")
+                gennametext.Size = UDim2.new(1, 0, 1, 0)
+                gennametext.Position = UDim2.new(0, 1, 0, 1)
+                gennametext.BackgroundTransparency = 1
+                gennametext.TextScaled = true
+                gennametext.Text = p.Name
+                gennametext.TextColor3 = Color3.fromRGB(255, 206, 28)
+                gennametext.Font = Enum.Font.Arcade
+                gennametext.Parent = gennamebill
 
-local highlight = Instance.new("Highlight", char)
-highlight.Archivable = true
-highlight.DepthMode = "AlwaysOnTop"
-highlight.Enabled = true
-highlight.OutlineColor= Color3.fromRGB(117, 117, 117)
-highlight.FillColor= Color3.fromRGB(117, 117, 117)
-highlight.FillTransparency = 0.9
-highlight.OutlineTransparency = 0
-highlight.Parent = char
+                local highlight = Instance.new("Highlight")
+                highlight.Archivable = true
+                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                highlight.Enabled = true
+                highlight.OutlineColor = Color3.fromRGB(255, 206, 28)
+                highlight.FillColor = Color3.fromRGB(255, 206, 28)
+                highlight.FillTransparency = 0.9
+                highlight.OutlineTransparency = 0
+                highlight.Parent = p
 
+                local temp = game:GetService("RunService").Heartbeat:Connect(function()
+                    if p:FindFirstChild("Progress").Value >= 99 then
+                        gennametext.Text = ""
+                        highlight:Destroy()
+                        textLabel.Text = ""
+                    else
+                        gennametext.Text = "Generator"
+                        textLabel.Text = "修机进度: "..p.Progress.Value.."%"
+                    end
+                end)
 
-local temp = char:FindFirstChild("Humanoid").HealthChanged:Connect(function()
-	textLabel.Text = "血量: "..char:FindFirstChild("Humanoid").Health.."/"..char:FindFirstChild("Humanoid").MaxHealth
-end)
+                if p:FindFirstChild("Progress").Value >= 99 then
+                    temp:Disconnect()
+                end
 
-char:FindFirstChild("Humanoid").Died:Connect(function()
-	temp:Disconnect()
-	textLabel.Text = ""
-	charnametext.Text = ""
-	highlight.OutlineTransparency = 1
-end)
+                p.Destroying:Connect(function()
+                    temp:Disconnect()
+                end)
 
+                return textLabel
+            end
 
-return textLabel
+            local function itemesp(p)
+                local billboard = Instance.new("BillboardGui")
+                billboard.Size = UDim2.new(2, 0, 0.5, 0) 
+                billboard.StudsOffset = Vector3.new(0, 1.25, 0) 
+                billboard.Adornee = p:FindFirstChild("ItemRoot")
+                billboard.Parent = p:FindFirstChild("ItemRoot")
+                billboard.AlwaysOnTop = true
+                local textLabel = Instance.new("TextLabel")
+                textLabel.Size = UDim2.new(1, 0, 1, 0)
+                textLabel.Position = UDim2.new(0, 1, 0, 1)
+                textLabel.BackgroundTransparency = 1
+                textLabel.TextScaled = true
+                textLabel.Text = p.Name
+                textLabel.TextColor3 = Color3.fromRGB(32, 54, 153)
+                textLabel.Font = Enum.Font.Arcade
+                textLabel.Parent = billboard
 
-end
+                local highlight = Instance.new("Highlight")
+                highlight.Archivable = true
+                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                highlight.Enabled = true
+                highlight.OutlineColor = Color3.fromRGB(32, 54, 153)
+                highlight.FillColor = Color3.fromRGB(32, 54, 153)
+                highlight.FillTransparency = 0.9
+                highlight.OutlineTransparency = 0
+                highlight.Parent = p
 
-local function genesp(p)
-local billboard = Instance.new("BillboardGui")
-billboard.Size = UDim2.new(2, 0, 0.5, 0) 
-billboard.StudsOffset = Vector3.new(0, 1.25, 0) 
-billboard.Adornee = p.Main
-billboard.Parent = p.Main
-billboard.AlwaysOnTop = true
-local textLabel = Instance.new("TextLabel")
-textLabel.Size = UDim2.new(1, 0, 1, 0)
-textLabel.Position = UDim2.new(0, 1, 0, 1)
-textLabel.BackgroundTransparency = 1
-textLabel.TextScaled = true
-textLabel.Text = ""
-textLabel.TextColor3 = Color3.fromRGB(255, 206, 28)
-textLabel.Font = Enum.Font.Arcade
-textLabel.Parent = billboard
+                return textLabel
+            end
 
-local gennamebill = Instance.new("BillboardGui")
-gennamebill.Size = UDim2.new(9, 0, 1, 0) 
-gennamebill.StudsOffset = Vector3.new(0, 2, 0) 
-gennamebill.Adornee = p.Main
-gennamebill.Parent = p.Main
-gennamebill.AlwaysOnTop = true
-local gennametext = Instance.new("TextLabel")
-gennametext.Size = UDim2.new(1, 0, 1, 0)
-gennametext.Position = UDim2.new(0, 1, 0, 1)
-gennametext.BackgroundTransparency = 1
-gennametext.TextScaled = true
-gennametext.Text = p.Name
-gennametext.TextColor3 = Color3.fromRGB(255, 206, 28)
-gennametext.Font = Enum.Font.Arcade
-gennametext.Parent = gennamebill
+            sur.DescendantAdded:Connect(function(v)
+                if v:IsA("Model") and v:FindFirstChild("Humanoid") then
+                    repeat wait() until v:FindFirstChild("Humanoid")
+                    survivoresp(v)
+                end
+            end)
 
-local highlight = Instance.new("Highlight", char)
-highlight.Archivable = true
-highlight.DepthMode = "AlwaysOnTop"
-highlight.Enabled = true
-highlight.OutlineColor= Color3.fromRGB(255, 206, 28)
-highlight.FillColor= Color3.fromRGB(255, 206, 28)
-highlight.FillTransparency = 0.9
-highlight.OutlineTransparency = 0
-highlight.Parent = p
+            for _,v in pairs(sur:GetDescendants()) do
+                if v:IsA("Model") and v:FindFirstChild("Humanoid") then
+                    repeat wait() until v:FindFirstChild("Humanoid")
+                    survivoresp(v)
+                end
+            end
 
+            kil.DescendantAdded:Connect(function(v)
+                if v:IsA("Model") and v:FindFirstChild("Humanoid")  then
+                    repeat wait() until v:FindFirstChild("Humanoid")
+                    killeresp(v)
+                end
+            end)
 
-local temp = game:GetService("RunService").Heartbeat:Connect(function()
-if p:FindFirstChild("Progress").Value >= 99 then
-	gennametext.Text = ""
-	highlight:Destroy()
-	textLabel.Text = ""
-	else
-	gennametext.Text = "Generator"
-	textLabel.Text = "修机进度: "..p.Progress.Value.."%"
-end
-end)
+            for _,v in pairs(kil:GetDescendants()) do
+                if v:IsA("Model") and v:FindFirstChild("Humanoid") then
+                    repeat wait() until v:FindFirstChild("Humanoid")
+                    killeresp(v)
+                end
+            end
 
-if p:FindFirstChild("Progress").Value >= 99 then
-	temp:Disconnect()
-end
+            spe.DescendantAdded:Connect(function(v)
+                if v:IsA("Model") and v:FindFirstChild("Humanoid") then
+                    repeat wait() until v:FindFirstChild("Humanoid")
+                    specesp(v)
+                end
+            end)
 
-p.Destroying:Connect(function()
-		temp:Disconnect()
-end)
+            for _,v in pairs(spe:GetDescendants()) do
+                if v:IsA("Model") and v:FindFirstChild("Humanoid") then
+                    repeat wait() until v:FindFirstChild("Humanoid")
+                    specesp(v)
+                end
+            end
 
-return textLabel
+            ing.DescendantAdded:Connect(function(v)
+                if v:IsA("Model") and v:FindFirstChild("Main")  and v.Name == "Generator" then
+                    repeat wait() until v.Name == "Generator"
+                    genesp(v)
+                end
+            end)
 
-end
+            for _,v in pairs(ing:GetDescendants()) do
+                if v:IsA("Model") and v:FindFirstChild("Main") and v.Name == "Generator" then
+                    repeat wait() until v.Name == "Generator"
+                    genesp(v)
+                end
+            end
 
-local function itemesp(p)
-local billboard = Instance.new("BillboardGui")
-billboard.Size = UDim2.new(2, 0, 0.5, 0) 
-billboard.StudsOffset = Vector3.new(0, 1.25, 0) 
-billboard.Adornee = p:FindFirstChild("ItemRoot")
-billboard.Parent = p:FindFirstChild("ItemRoot")
-billboard.AlwaysOnTop = true
-local textLabel = Instance.new("TextLabel")
-textLabel.Size = UDim2.new(1, 0, 1, 0)
-textLabel.Position = UDim2.new(0, 1, 0, 1)
-textLabel.BackgroundTransparency = 1
-textLabel.TextScaled = true
-textLabel.Text = p.Name
-textLabel.TextColor3 = Color3.fromRGB(32, 54, 153)
-textLabel.Font = Enum.Font.Arcade
-textLabel.Parent = billboard
+            ing.DescendantAdded:Connect(function(v)
+                if v:IsA("Tool") then
+                    repeat wait() until v:IsA("Tool")
+                    itemesp(v)
+                end
+            end)
 
-local highlight = Instance.new("Highlight", char)
-highlight.Archivable = true
-highlight.DepthMode = "AlwaysOnTop"
-highlight.Enabled = true
-highlight.OutlineColor= Color3.fromRGB(32, 54, 153)
-highlight.FillColor= Color3.fromRGB(32, 54, 153)
-highlight.FillTransparency = 0.9
-highlight.OutlineTransparency = 0
-highlight.Parent = p
-
-
-return textLabel
-
-end
-
-sur.DescendantAdded:Connect(function(v)
-	if v:IsA("Model") and v:FindFirstChild("Humanoid") then
-	repeat wait() until v:FindFirstChild("Humanoid")
-		survivoresp(v)
-	end
-end)
-
-for _,v in pairs(sur:GetDescendants()) do
-	if v:IsA("Model") and v:FindFirstChild("Humanoid") then
-	repeat wait() until v:FindFirstChild("Humanoid")
-		survivoresp(v)
-	end
-end
-
-kil.DescendantAdded:Connect(function(v)
-	if v:IsA("Model") and v:FindFirstChild("Humanoid")  then
-	repeat wait() until v:FindFirstChild("Humanoid")
-		killeresp(v)
-	end
-end)
-
-for _,v in pairs(kil:GetDescendants()) do
-	if v:IsA("Model") and v:FindFirstChild("Humanoid") then
-	repeat wait() until v:FindFirstChild("Humanoid")
-		killeresp(v)
-	end
-end
-
-spe.DescendantAdded:Connect(function(v)
-	if v:IsA("Model") and v:FindFirstChild("Humanoid") then
-	repeat wait() until v:FindFirstChild("Humanoid")
-		specesp(v)
-	end
-end)
-
-for _,v in pairs(spe:GetDescendants()) do
-	if v:IsA("Model") and v:FindFirstChild("Humanoid") then
-	repeat wait() until v:FindFirstChild("Humanoid")
-		specesp(v)
-	end
-end
-
-ing.DescendantAdded:Connect(function(v)
-	if v:IsA("Model") and v:FindFirstChild("Main")  and v.Name == "Generator" then
-		repeat wait() until v.Name == "Generator"
-		genesp(v)
-	end
-end)
-
-for _,v in pairs(ing:GetDescendants()) do
-	if v:IsA("Model") and v:FindFirstChild("Main") and v.Name == "Generator" then
-	repeat wait() until v.Name == "Generator"
-		genesp(v)
-	end
-end
-
-ing.DescendantAdded:Connect(function(v)
-	if v:IsA("Tool") then
-	repeat wait() until v:IsA("Tool")
-		itemesp(v)
-	end
-end)
-
-for _,v in pairs(ing:GetDescendants()) do
-	if v:IsA("Tool") then
-	repeat wait() until v:IsA("Tool")
-		itemesp(v)
-	end
-end
-    end
-})
+            for _,v in pairs(ing:GetDescendants()) do
+                if v:IsA("Tool") then
+                    repeat wait() until v:IsA("Tool")
+                    itemesp(v)
+                end
+            end
+        end
+    })
 
     -- 初始化设置
     local DistanceSettings = {
@@ -1039,325 +1022,215 @@ end
             HighlightSettings.ShowKillerHighlights = enabled
         end
     })
-end
 
     local Toggle13 = Tab5:Toggle({
         Title = "绘制发电机",
         Desc = "FIN",
         Locked = false,
         Callback = function(enabled)
-        -- 将 generatorData 移到回调函数内部，确保每次开启都是独立的作用域
-        local generatorData = {}
-        
-        if enabled then
-            local scanInterval = 0.5 
-            local lastScanTime = 0
+            -- 将 generatorData 移到回调函数内部，确保每次开启都是独立的作用域
+            local generatorData = {}
             
-            local distanceSettings = {
-                MinDistance = 5,
-                MaxDistance = 100,
-                MinScale = 0.8,
-                MaxScale = 1.5,
-                MinTextSize = 8,
-                MaxTextSize = 10
-            }
-            
-            local function updateGeneratorESP(gen, data)
-                if not gen or not gen:FindFirstChild("Main") then return end
+            if enabled then
+                local scanInterval = 0.5 
+                local lastScanTime = 0
                 
-                local character = game:GetService("Players").LocalPlayer.Character
-                local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
-                
-                if gen:FindFirstChild("Progress") then
-                    local progress = gen.Progress.Value
-                    if progress >= 99 then
-                        if data.billboard then data.billboard:Destroy() end
-                        if data.distanceBillboard then data.distanceBillboard:Destroy() end
-                        if data.highlight then data.highlight:Destroy() end
-                        generatorData[gen] = nil
-                        return
-                    end
-                    
-                    if data.textLabel then
-                        data.textLabel.Text = string.format("电机进度: %d%%", progress)
-                    end
-                    
-                    if humanoidRootPart and data.distanceLabel then
-                        local distance = (gen.Main.Position - humanoidRootPart.Position).Magnitude
-                        data.distanceLabel.Text = string.format("距离: %d米", math.floor(distance))
-                        
-                        local distanceRatio = math.clamp(
-                            (distance - distanceSettings.MinDistance) / 
-                            (distanceSettings.MaxDistance - distanceSettings.MinDistance),
-                            0, 1
-                        )
-                        
-                        local scale = distanceSettings.MinScale + 
-                            distanceRatio * (distanceSettings.MaxScale - distanceSettings.MinScale)
-                        
-                        local textSize = distanceSettings.MinTextSize + 
-                            distanceRatio * (distanceSettings.MaxTextSize - distanceSettings.MinTextSize)
-                        
-                        if data.billboard then data.billboard.Size = UDim2.new(4 * scale, 0, 1 * scale, 0) end
-                        if data.distanceBillboard then data.distanceBillboard.Size = UDim2.new(4 * scale, 0, 1 * scale, 0) end
-                        if data.textLabel then data.textLabel.TextSize = textSize end
-                        if data.distanceLabel then data.distanceLabel.TextSize = textSize end
-                        
-                        local transparency = math.clamp((distance - 50) / 100, 0, 0.4)
-                        if data.textLabel then data.textLabel.TextTransparency = transparency end
-                        if data.distanceLabel then data.distanceLabel.TextTransparency = transparency end
-                        if data.highlight then data.highlight.FillTransparency = 0.85 + (transparency * 0.5) end
-                    end
-                end
-            end
-            
-            local function createGeneratorESP(gen)
-                if not gen or not gen:FindFirstChild("Main") or generatorData[gen] then return end
-                
-                local billboard = Instance.new("BillboardGui")
-                billboard.Name = "GeneratorESP"
-                billboard.Size = UDim2.new(4, 0, 1, 0)
-                billboard.StudsOffset = Vector3.new(0, 2.5, 0)
-                billboard.Adornee = gen.Main
-                billboard.Parent = gen.Main
-                billboard.AlwaysOnTop = true
-                
-                local textLabel = Instance.new("TextLabel")
-                textLabel.Size = UDim2.new(1, 0, 0.5, 0)
-                textLabel.BackgroundTransparency = 1
-                textLabel.TextScaled = false
-                textLabel.Text = "电机加载中..."
-                textLabel.TextColor3 = Color3.fromRGB(0, 255, 255)
-                textLabel.Font = Enum.Font.Arcade
-                textLabel.TextStrokeTransparency = 0
-                textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                textLabel.TextSize = 8
-                textLabel.Parent = billboard
-                
-                local distanceBillboard = Instance.new("BillboardGui")
-                distanceBillboard.Name = "GeneratorDistanceESP"
-                distanceBillboard.Size = UDim2.new(4, 0, 1, 0)
-                distanceBillboard.StudsOffset = Vector3.new(0, 3.5, 0)
-                distanceBillboard.Adornee = gen.Main
-                distanceBillboard.Parent = gen.Main
-                distanceBillboard.AlwaysOnTop = true
-                
-                local distanceLabel = Instance.new("TextLabel")
-                distanceLabel.Size = UDim2.new(1, 0, 0.5, 0)
-                distanceLabel.BackgroundTransparency = 1
-                distanceLabel.TextScaled = false
-                distanceLabel.Text = "计算距离中..."
-                distanceLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
-                distanceLabel.Font = Enum.Font.Arcade
-                distanceLabel.TextStrokeTransparency = 0
-                distanceLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                distanceLabel.TextSize = 8
-                distanceLabel.Parent = distanceBillboard
-                
-                local highlight = Instance.new("Highlight")
-                highlight.Name = "GeneratorHighlight"
-                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                highlight.Enabled = true
-                highlight.OutlineColor = Color3.fromRGB(0, 255, 255)
-                highlight.FillColor = Color3.fromRGB(0, 255, 255)
-                highlight.FillTransparency = 0.9
-                highlight.OutlineTransparency = 0
-                highlight.Parent = gen
-                
-                generatorData[gen] = {
-                    billboard = billboard,
-                    distanceBillboard = distanceBillboard,
-                    textLabel = textLabel,
-                    distanceLabel = distanceLabel,
-                    highlight = highlight
+                local distanceSettings = {
+                    MinDistance = 5,
+                    MaxDistance = 100,
+                    MinScale = 0.8,
+                    MaxScale = 1.5,
+                    MinTextSize = 8,
+                    MaxTextSize = 10
                 }
                 
-                gen.Destroying:Connect(function()
-                    if generatorData[gen] then
-                        if generatorData[gen].billboard then generatorData[gen].billboard:Destroy() end
-                        if generatorData[gen].distanceBillboard then generatorData[gen].distanceBillboard:Destroy() end
-                        if generatorData[gen].highlight then generatorData[gen].highlight:Destroy() end
-                        generatorData[gen] = nil
+                local function updateGeneratorESP(gen, data)
+                    if not gen or not gen:FindFirstChild("Main") then return end
+                    
+                    local character = game:GetService("Players").LocalPlayer.Character
+                    local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
+                    
+                    if gen:FindFirstChild("Progress") then
+                        local progress = gen.Progress.Value
+                        if progress >= 99 then
+                            if data.billboard then data.billboard:Destroy() end
+                            if data.distanceBillboard then data.distanceBillboard:Destroy() end
+                            if data.highlight then data.highlight:Destroy() end
+                            generatorData[gen] = nil
+                            return
+                        end
+                        
+                        if data.textLabel then
+                            data.textLabel.Text = string.format("电机进度: %d%%", progress)
+                        end
+                        
+                        if humanoidRootPart and data.distanceLabel then
+                            local distance = (gen.Main.Position - humanoidRootPart.Position).Magnitude
+                            data.distanceLabel.Text = string.format("距离: %d米", math.floor(distance))
+                            
+                            local distanceRatio = math.clamp(
+                                (distance - distanceSettings.MinDistance) / 
+                                (distanceSettings.MaxDistance - distanceSettings.MinDistance),
+                                0, 1
+                            )
+                            
+                            local scale = distanceSettings.MinScale + 
+                                distanceRatio * (distanceSettings.MaxScale - distanceSettings.MinScale)
+                            
+                            local textSize = distanceSettings.MinTextSize + 
+                                distanceRatio * (distanceSettings.MaxTextSize - distanceSettings.MinTextSize)
+                            
+                            if data.billboard then data.billboard.Size = UDim2.new(4 * scale, 0, 1 * scale, 0) end
+                            if data.distanceBillboard then data.distanceBillboard.Size = UDim2.new(4 * scale, 0, 1 * scale, 0) end
+                            if data.textLabel then data.textLabel.TextSize = textSize end
+                            if data.distanceLabel then data.distanceLabel.TextSize = textSize end
+                            
+                            local transparency = math.clamp((distance - 50) / 100, 0, 0.4)
+                            if data.textLabel then data.textLabel.TextTransparency = transparency end
+                            if data.distanceLabel then data.distanceLabel.TextTransparency = transparency end
+                            if data.highlight then data.highlight.FillTransparency = 0.85 + (transparency * 0.5) end
+                        end
+                    end
+                end
+                
+                local function createGeneratorESP(gen)
+                    if not gen or not gen:FindFirstChild("Main") or generatorData[gen] then return end
+                    
+                    local billboard = Instance.new("BillboardGui")
+                    billboard.Name = "GeneratorESP"
+                    billboard.Size = UDim2.new(4, 0, 1, 0)
+                    billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+                    billboard.Adornee = gen.Main
+                    billboard.Parent = gen.Main
+                    billboard.AlwaysOnTop = true
+                    
+                    local textLabel = Instance.new("TextLabel")
+                    textLabel.Size = UDim2.new(1, 0, 0.5, 0)
+                    textLabel.BackgroundTransparency = 1
+                    textLabel.TextScaled = false
+                    textLabel.Text = "电机加载中..."
+                    textLabel.TextColor3 = Color3.fromRGB(0, 255, 255)
+                    textLabel.Font = Enum.Font.Arcade
+                    textLabel.TextStrokeTransparency = 0
+                    textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                    textLabel.TextSize = 8
+                    textLabel.Parent = billboard
+                    
+                    local distanceBillboard = Instance.new("BillboardGui")
+                    distanceBillboard.Name = "GeneratorDistanceESP"
+                    distanceBillboard.Size = UDim2.new(4, 0, 1, 0)
+                    distanceBillboard.StudsOffset = Vector3.new(0, 3.5, 0)
+                    distanceBillboard.Adornee = gen.Main
+                    distanceBillboard.Parent = gen.Main
+                    distanceBillboard.AlwaysOnTop = true
+                    
+                    local distanceLabel = Instance.new("TextLabel")
+                    distanceLabel.Size = UDim2.new(1, 0, 0.5, 0)
+                    distanceLabel.BackgroundTransparency = 1
+                    distanceLabel.TextScaled = false
+                    distanceLabel.Text = "计算距离中..."
+                    distanceLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+                    distanceLabel.Font = Enum.Font.Arcade
+                    distanceLabel.TextStrokeTransparency = 0
+                    distanceLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                    distanceLabel.TextSize = 8
+                    distanceLabel.Parent = distanceBillboard
+                    
+                    local highlight = Instance.new("Highlight")
+                    highlight.Name = "GeneratorHighlight"
+                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                    highlight.Enabled = true
+                    highlight.OutlineColor = Color3.fromRGB(0, 255, 255)
+                    highlight.FillColor = Color3.fromRGB(0, 255, 255)
+                    highlight.FillTransparency = 0.9
+                    highlight.OutlineTransparency = 0
+                    highlight.Parent = gen
+                    
+                    generatorData[gen] = {
+                        billboard = billboard,
+                        distanceBillboard = distanceBillboard,
+                        textLabel = textLabel,
+                        distanceLabel = distanceLabel,
+                        highlight = highlight
+                    }
+                    
+                    gen.Destroying:Connect(function()
+                        if generatorData[gen] then
+                            if generatorData[gen].billboard then generatorData[gen].billboard:Destroy() end
+                            if generatorData[gen].distanceBillboard then generatorData[gen].distanceBillboard:Destroy() end
+                            if generatorData[gen].highlight then generatorData[gen].highlight:Destroy() end
+                            generatorData[gen] = nil
+                        end
+                    end)
+                end
+                
+                local function scanGenerators()
+                    for _, gen in pairs(workspace:GetDescendants()) do
+                        if gen:IsA("Model") and gen:FindFirstChild("Main") and gen.Name == "Generator" then
+                            createGeneratorESP(gen)
+                        end
+                    end
+                end
+                
+                local mainConnection = workspace.DescendantAdded:Connect(function(v)
+                    if v:IsA("Model") and v:FindFirstChild("Main") and v.Name == "Generator" then
+                        createGeneratorESP(v)
                     end
                 end)
-            end
-            
-            local function scanGenerators()
-                for _, gen in pairs(workspace:GetDescendants()) do
-                    if gen:IsA("Model") and gen:FindFirstChild("Main") and gen.Name == "Generator" then
-                        createGeneratorESP(gen)
+                
+                local heartbeatConnection = game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
+                    lastScanTime = lastScanTime + deltaTime
+                    if lastScanTime >= scanInterval then
+                        lastScanTime = 0
+                        scanGenerators()
                     end
-                end
-            end
-            
-            local mainConnection = workspace.DescendantAdded:Connect(function(v)
-                if v:IsA("Model") and v:FindFirstChild("Main") and v.Name == "Generator" then
-                    createGeneratorESP(v)
-                end
-            end)
-            
-            local heartbeatConnection = game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
-                lastScanTime = lastScanTime + deltaTime
-                if lastScanTime >= scanInterval then
-                    lastScanTime = 0
-                    scanGenerators()
+                    
+                    for gen, data in pairs(generatorData) do
+                        if gen and gen.Parent then
+                            updateGeneratorESP(gen, data)
+                        else
+                            if data.billboard then data.billboard:Destroy() end
+                            if data.distanceBillboard then data.distanceBillboard:Destroy() end
+                            if data.highlight then data.highlight:Destroy() end
+                            generatorData[gen] = nil
+                        end
+                    end
+                end)
+                
+                -- 存储连接以便之后断开
+                generatorData.connections = {
+                    main = mainConnection,
+                    heartbeat = heartbeatConnection
+                }
+            else
+                -- 关闭功能时的清理逻辑
+                if generatorData.connections then
+                    for _, connection in pairs(generatorData.connections) do
+                        if connection then
+                            connection:Disconnect()
+                        end
+                    end
                 end
                 
                 for gen, data in pairs(generatorData) do
-                    if gen and gen.Parent then
-                        updateGeneratorESP(gen, data)
-                    else
+                    if type(data) == "table" then
                         if data.billboard then data.billboard:Destroy() end
                         if data.distanceBillboard then data.distanceBillboard:Destroy() end
                         if data.highlight then data.highlight:Destroy() end
-                        generatorData[gen] = nil
                     end
-                end
-            end)
-            
-            -- 存储连接以便之后断开
-            generatorData.connections = {
-                main = mainConnection,
-                heartbeat = heartbeatConnection
-            }
-        else
-            -- 关闭功能时的清理逻辑
-            if generatorData.connections then
-                for _, connection in pairs(generatorData.connections) do
-                    if connection then
-                        connection:Disconnect()
-                    end
-                end
-            end
-            
-            for gen, data in pairs(generatorData) do
-                if type(data) == "table" then
-                    if data.billboard then data.billboard:Destroy() end
-                    if data.distanceBillboard then data.distanceBillboard:Destroy() end
-                    if data.highlight then data.highlight:Destroy() end
                 end
             end
         end
-    end
-})
+    })
 
-  local Tab6 = Window:Tab({
-    Title = "VIP动作🤑",
-    Icon = "drama",
-    Locked = false,
-})
+    local Tab6 = Window:Tab({
+        Title = "VIP动作🤑",
+        Icon = "drama",
+        Locked = false,
+    })
 
-local Toggle14 = Tab6:Toggle({
-    Title = "VIP动作",
-    Desc = "新版",
-    Locked = false,
-    Callback = function(state)
-        local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
-        local humanoid = char:WaitForChild("Humanoid")
-        local rootPart = char:WaitForChild("HumanoidRootPart")
-        
-        if state then
-            -- 存储原始值以便恢复
-            local originalJumpPower = humanoid.JumpPower
-            local originalPlatformStand = humanoid.PlatformStand
-            
-            -- 激活状态
-            humanoid.PlatformStand = true
-            humanoid.JumpPower = 0
-            
-            local bodyVelocity = Instance.new("BodyVelocity")
-            bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
-            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-            bodyVelocity.Parent = rootPart
-            
-            local animation = Instance.new("Animation")
-            animation.AnimationId = "rbxassetid://138019937280193"  -- 确保这个ID是正确的
-            local animationTrack = humanoid:LoadAnimation(animation)
-            animationTrack:Play()
-            
-            local sound = Instance.new("Sound")
-            sound.SoundId = "rbxassetid://109474987384441"  -- 确保这个ID是正确的
-            sound.Parent = rootPart
-            sound.Volume = 0.5
-            sound.Looped = true
-            sound:Play()
-            
-            -- 检查特效路径是否存在
-            local replicatedStorage = game:GetService("ReplicatedStorage")
-            if replicatedStorage:FindFirstChild("Assets") and
-               replicatedStorage.Assets:FindFirstChild("Emotes") and
-               replicatedStorage.Assets.Emotes:FindFirstChild("HakariDance") and
-               replicatedStorage.Assets.Emotes.HakariDance:FindFirstChild("HakariBeamEffect") then
-                
-                local effect = replicatedStorage.Assets.Emotes.HakariDance.HakariBeamEffect:Clone()
-                effect.Name = "PlayerEmoteVFX"
-                effect.CFrame = rootPart.CFrame * CFrame.new(0, -1, -0.3)
-                
-                -- 确保有WeldConstraint
-                if effect:FindFirstChildOfClass("WeldConstraint") then
-                    effect.WeldConstraint.Part0 = rootPart
-                    effect.WeldConstraint.Part1 = effect
-                end
-                
-                effect.Parent = char
-                effect.CanCollide = false
-            end
-            
-            -- 发送网络事件
-            local networkModule = replicatedStorage:FindFirstChild("Modules")
-            if networkModule then
-                local network = networkModule:FindFirstChild("Network")
-                if network then
-                    local remoteEvent = network:FindFirstChild("RemoteEvent")
-                    if remoteEvent then
-                        remoteEvent:FireServer("PlayEmote", "Animations", "HakariDance")
-                    end
-                end
-            end
-            
-            -- 动画停止时的处理
-            animationTrack.Stopped:Connect(function()
-                humanoid.PlatformStand = originalPlatformStand
-                humanoid.JumpPower = originalJumpPower
-                if bodyVelocity and bodyVelocity.Parent then
-                    bodyVelocity:Destroy()
-                end
-            end)
-        else
-            -- 关闭状态
-            humanoid.PlatformStand = false
-            humanoid.JumpPower = 50  -- 恢复默认跳跃力
-            
-            local bodyVelocity = rootPart:FindFirstChildOfClass("BodyVelocity")
-            if bodyVelocity then
-                bodyVelocity:Destroy()
-            end
-            
-            local sound = rootPart:FindFirstChildOfClass("Sound")
-            if sound then
-                sound:Stop()
-                sound:Destroy()
-            end
-            
-            local effect = char:FindFirstChild("PlayerEmoteVFX")
-            if effect then
-                effect:Destroy()
-            end
-            
-            for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
-                if track.Animation.AnimationId == "rbxassetid://138019937280193" then
-                    track:Stop()
-                end
-            end
-        end
-    end
-})
-
-local Toggle15 = Tab6:Toggle({
-    Title = "VIP动作",
-    Desc = "旧版",
-    Locked = false,
-    Callback = function(state)
+    -- VIP动作通用函数
+    local function setupVIPAction(state, soundId)
         local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
         local humanoid = char:WaitForChild("Humanoid")
         local rootPart = char:WaitForChild("HumanoidRootPart")
@@ -1382,7 +1255,7 @@ local Toggle15 = Tab6:Toggle({
             animationTrack:Play()
             
             local sound = Instance.new("Sound")
-            sound.SoundId = "rbxassetid://87166578676888"  -- 不同的声音ID
+            sound.SoundId = soundId
             sound.Parent = rootPart
             sound.Volume = 0.5
             sound.Looped = true
@@ -1457,4 +1330,22 @@ local Toggle15 = Tab6:Toggle({
             end
         end
     end
-})
+
+    local Toggle14 = Tab6:Toggle({
+        Title = "VIP动作",
+        Desc = "新版",
+        Locked = false,
+        Callback = function(state)
+            setupVIPAction(state, "rbxassetid://109474987384441")
+        end
+    })
+
+    local Toggle15 = Tab6:Toggle({
+        Title = "VIP动作",
+        Desc = "旧版",
+        Locked = false,
+        Callback = function(state)
+            setupVIPAction(state, "rbxassetid://87166578676888")
+        end
+    })
+end
