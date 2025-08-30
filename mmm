@@ -282,23 +282,66 @@ function createMainWindow()
         Desc = "FIN",
         Locked = false,
         Callback = function(state)
-            autoTeleportColaEnabled = state
-            
-            if autoTeleportColaEnabled then
-                teleportColaThread = task.spawn(function()
-                    while autoTeleportColaEnabled and task.wait(0.5) do
-                        local character = game.Players.LocalPlayer.Character
-                        if character and character:FindFirstChild("HumanoidRootPart") then
-                            local humanoidRootPart = character.HumanoidRootPart
-                            
-                            -- 使用递归查找
-                            local cola = findFirstChildRecursive(workspace, "BloxyCola")
+        autoTeleportColaEnabled = state
+        
+        if autoTeleportColaEnabled then
+            teleportColaThread = task.spawn(function()
+                while autoTeleportColaEnabled and task.wait(0.5) do
+                    -- 获取玩家角色
+                    local character = game.Players.LocalPlayer.Character
+                    if character and character:FindFirstChild("HumanoidRootPart") then
+                        local humanoidRootPart = character.HumanoidRootPart
+                        
+                        -- 查找可乐
+                        local cola = workspace:FindFirstChild("Map", true)
+                        if cola then
+                            cola = cola:FindFirstChild("Ingame", true)
                             if cola then
-                                local itemRoot = findFirstChildRecursive(cola, "ItemRoot")
+                                cola = cola:FindFirstChild("BloxyCola", true)
+                                if cola then
+                                    local itemRoot = cola:FindFirstChild("ItemRoot", true)
+                                    if itemRoot then
+                                        -- 将可乐传送到玩家前方3个单位的位置
+                                        itemRoot.CFrame = humanoidRootPart.CFrame + humanoidRootPart.CFrame.LookVector * 3
+                                        
+                                        -- 查找互动提示并触发
+                                        local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
+                                        if prompt then
+                                            fireproximityprompt(prompt)
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        elseif teleportColaThread then
+            task.cancel(teleportColaThread)
+            teleportColaThread = nil
+        end
+    end
+})
+
+    local Toggle5 = Tab3:Toggle({
+        Title = "自动互动医疗包",
+        Desc = "不关上无法丢弃💀",
+        Locked = false,
+        Callback = function(state)
+        autoMedkitEnabled = state
+        
+        if autoMedkitEnabled then
+            medkitThread = task.spawn(function()
+                while autoMedkitEnabled and task.wait(0.5) do
+                    local medkit = workspace:FindFirstChild("Map", true)
+                    if medkit then
+                        medkit = medkit:FindFirstChild("Ingame", true)
+                        if medkit then
+                            medkit = medkit:FindFirstChild("Medkit", true)
+                            if medkit then
+                                local itemRoot = medkit:FindFirstChild("ItemRoot", true)
                                 if itemRoot then
-                                    itemRoot.CFrame = humanoidRootPart.CFrame + humanoidRootPart.CFrame.LookVector * 3
-                                    
-                                    local prompt = itemRoot:FindFirstChild("ProximityPrompt")
+                                    local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
                                     if prompt then
                                         fireproximityprompt(prompt)
                                     end
@@ -306,73 +349,49 @@ function createMainWindow()
                             end
                         end
                     end
-                end)
-            elseif teleportColaThread then
-                task.cancel(teleportColaThread)
-                teleportColaThread = nil
-            end
+                end
+            end)
+        elseif medkitThread then
+            task.cancel(medkitThread)
+            medkitThread = nil
         end
-    })
-
-    local Toggle5 = Tab3:Toggle({
-        Title = "自动互动医疗包",
-        Desc = "不关上无法丢弃💀",
-        Locked = false,
-        Callback = function(state)
-            autoMedkitEnabled = state
-            
-            if autoMedkitEnabled then
-                medkitThread = task.spawn(function()
-                    while autoMedkitEnabled and task.wait(0.5) do
-                        -- 使用递归查找
-                        local medkit = findFirstChildRecursive(workspace, "Medkit")
-                        if medkit then
-                            local itemRoot = findFirstChildRecursive(medkit, "ItemRoot")
-                            if itemRoot then
-                                local prompt = itemRoot:FindFirstChild("ProximityPrompt")
-                                if prompt then
-                                    fireproximityprompt(prompt)
-                                end
-                            end
-                        end
-                    end
-                end)
-            elseif medkitThread then
-                task.cancel(medkitThread)
-                medkitThread = nil
-            end
-        end
-    })
+    end
+})
 
     local Toggle6 = Tab3:Toggle({
         Title = "自动互动可乐罐",
         Desc = "不关上无法丢弃💀",
         Locked = false,
         Callback = function(state)
-            autoColaEnabled = state
-            
-            if autoColaEnabled then
-                colaThread = task.spawn(function()
-                    while autoColaEnabled and task.wait(0.5) do
-                        -- 使用递归查找
-                        local cola = findFirstChildRecursive(workspace, "BloxyCola")
+        autoColaEnabled = state
+        
+        if autoColaEnabled then
+            colaThread = task.spawn(function()
+                while autoColaEnabled and task.wait(0.5) do
+                    local cola = workspace:FindFirstChild("Map", true)
+                    if cola then
+                        cola = cola:FindFirstChild("Ingame", true)
                         if cola then
-                            local itemRoot = findFirstChildRecursive(cola, "ItemRoot")
-                            if itemRoot then
-                                local prompt = itemRoot:FindFirstChild("ProximityPrompt")
-                                if prompt then
-                                    fireproximityprompt(prompt)
+                            cola = cola:FindFirstChild("BloxyCola", true)
+                            if cola then
+                                local itemRoot = cola:FindFirstChild("ItemRoot", true)
+                                if itemRoot then
+                                    local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
+                                    if prompt then
+                                        fireproximityprompt(prompt)
+                                    end
                                 end
                             end
                         end
                     end
-                end)
-            elseif colaThread then
-                task.cancel(colaThread)
-                colaThread = nil
-            end
+                end
+            end)
+        elseif colaThread then
+            task.cancel(colaThread)
+            colaThread = nil
         end
-    })
+    end
+})
 
     local Tab4 = Window:Tab({
         Title = "修发动机",
