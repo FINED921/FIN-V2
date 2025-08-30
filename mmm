@@ -1083,198 +1083,200 @@ function createMainWindow()
         Desc = "FIN",
         Locked = false,
         Callback = function(enabled)
-            if enabled then
-                local scanInterval = 0.5 
-                local lastScanTime = 0
+        -- 将 generatorData 移到回调函数内部，确保每次开启都是独立的作用域
+        local generatorData = {}
+        
+        if enabled then
+            local scanInterval = 0.5 
+            local lastScanTime = 0
+            
+            local distanceSettings = {
+                MinDistance = 5,
+                MaxDistance = 100,
+                MinScale = 0.8,
+                MaxScale = 1.5,
+                MinTextSize = 8,
+                MaxTextSize = 10
+            }
+            
+            local function updateGeneratorESP(gen, data)
+                if not gen or not gen:FindFirstChild("Main") then return end
                 
-                local distanceSettings = {
-                    MinDistance = 5,
-                    MaxDistance = 100,
-                    MinScale = 0.8,
-                    MaxScale = 1.5,
-                    MinTextSize = 8,
-                    MaxTextSize = 10
-                }
+                local character = game:GetService("Players").LocalPlayer.Character
+                local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
                 
-                local function updateGeneratorESP(gen, data)
-                    if not gen or not gen:FindFirstChild("Main") then return end
-                    
-                    local character = game:GetService("Players").LocalPlayer.Character
-                    local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
-                    
-                    if gen:FindFirstChild("Progress") then
-                        local progress = gen.Progress.Value
-                        if progress >= 99 then
-                            if data.billboard then data.billboard:Destroy() end
-                            if data.distanceBillboard then data.distanceBillboard:Destroy() end
-                            if data.highlight then data.highlight:Destroy() end
-                            generatorData[gen] = nil
-                            return
-                        end
-                        
-                        if data.textLabel then
-                            data.textLabel.Text = string.format("电机进度: %d%%", progress)
-                        end
-                        
-                        if humanoidRootPart and data.distanceLabel then
-                            local distance = (gen.Main.Position - humanoidRootPart.Position).Magnitude
-                            data.distanceLabel.Text = string.format("距离: %d米", math.floor(distance))
-                            
-                            local distanceRatio = math.clamp(
-                                (distance - distanceSettings.MinDistance) / 
-                                (distanceSettings.MaxDistance - distanceSettings.MinDistance),
-                                0, 1
-                            )
-                            
-                            local scale = distanceSettings.MinScale + 
-                                distanceRatio * (distanceSettings.MaxScale - distanceSettings.MinScale)
-                            
-                            local textSize = distanceSettings.MinTextSize + 
-                                distanceRatio * (distanceSettings.MaxTextSize - distanceSettings.MinTextSize)
-                            
-                            if data.billboard then data.billboard.Size = UDim2.new(4 * scale, 0, 1 * scale, 0) end
-                            if data.distanceBillboard then data.distanceBillboard.Size = UDim2.new(4 * scale, 0, 1 * scale, 0) end
-                            if data.textLabel then data.textLabel.TextSize = textSize end
-                            if data.distanceLabel then data.distanceLabel.TextSize = textSize end
-                            
-                            local transparency = math.clamp((distance - 50) / 100, 0, 0.4)
-                            if data.textLabel then data.textLabel.TextTransparency = transparency end
-                            if data.distanceLabel then data.distanceLabel.TextTransparency = transparency end
-                            if data.highlight then data.highlight.FillTransparency = 0.85 + (transparency * 0.5) end
-                        end
-                    end
-                end
-                
-                local function createGeneratorESP(gen)
-                    if not gen or not gen:FindFirstChild("Main") or generatorData[gen] then return end
-                    
-                    local billboard = Instance.new("BillboardGui")
-                    billboard.Name = "GeneratorESP"
-                    billboard.Size = UDim2.new(4, 0, 1, 0)
-                    billboard.StudsOffset = Vector3.new(0, 2.5, 0)
-                    billboard.Adornee = gen.Main
-                    billboard.Parent = gen.Main
-                    billboard.AlwaysOnTop = true
-                    
-                    local textLabel = Instance.new("TextLabel")
-                    textLabel.Size = UDim2.new(1, 0, 0.5, 0)
-                    textLabel.BackgroundTransparency = 1
-                    textLabel.TextScaled = false
-                    textLabel.Text = "电机加载中..."
-                    textLabel.TextColor3 = Color3.fromRGB(0, 255, 255)
-                    textLabel.Font = Enum.Font.Arcade
-                    textLabel.TextStrokeTransparency = 0
-                    textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                    textLabel.TextSize = 8
-                    textLabel.Parent = billboard
-                    
-                    local distanceBillboard = Instance.new("BillboardGui")
-                    distanceBillboard.Name = "GeneratorDistanceESP"
-                    distanceBillboard.Size = UDim2.new(4, 0, 1, 0)
-                    distanceBillboard.StudsOffset = Vector3.new(0, 3.5, 0)
-                    distanceBillboard.Adornee = gen.Main
-                    distanceBillboard.Parent = gen.Main
-                    distanceBillboard.AlwaysOnTop = true
-                    
-                    local distanceLabel = Instance.new("TextLabel")
-                    distanceLabel.Size = UDim2.new(1, 0, 0.5, 0)
-                    distanceLabel.BackgroundTransparency = 1
-                    distanceLabel.TextScaled = false
-                    distanceLabel.Text = "计算距离中..."
-                    distanceLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
-                    distanceLabel.Font = Enum.Font.Arcade
-                    distanceLabel.TextStrokeTransparency = 0
-                    distanceLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                    distanceLabel.TextSize = 8
-                    distanceLabel.Parent = distanceBillboard
-                    
-                    local highlight = Instance.new("Highlight")
-                    highlight.Name = "GeneratorHighlight"
-                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                    highlight.Enabled = true
-                    highlight.OutlineColor = Color3.fromRGB(0, 255, 255)
-                    highlight.FillColor = Color3.fromRGB(0, 255, 255)
-                    highlight.FillTransparency = 0.9
-                    highlight.OutlineTransparency = 0
-                    highlight.Parent = gen
-                    
-                    generatorData[gen] = {
-                        billboard = billboard,
-                        distanceBillboard = distanceBillboard,
-                        textLabel = textLabel,
-                        distanceLabel = distanceLabel,
-                        highlight = highlight
-                    }
-                    
-                    gen.Destroying:Connect(function()
-                        if generatorData[gen] then
-                            if generatorData[gen].billboard then generatorData[gen].billboard:Destroy() end
-                            if generatorData[gen].distanceBillboard then generatorData[gen].distanceBillboard:Destroy() end
-                            if generatorData[gen].highlight then generatorData[gen].highlight:Destroy() end
-                            generatorData[gen] = nil
-                        end
-                    end)
-                end
-                
-                local function scanGenerators()
-                    for _, gen in pairs(workspace:GetDescendants()) do
-                        if gen:IsA("Model") and gen:FindFirstChild("Main") and gen.Name == "Generator" then
-                            createGeneratorESP(gen)
-                        end
-                    end
-                end
-                
-                local mainConnection = workspace.DescendantAdded:Connect(function(v)
-                    if v:IsA("Model") and v:FindFirstChild("Main") and v.Name == "Generator" then
-                        createGeneratorESP(v)
-                    end
-                end)
-                
-                local heartbeatConnection = game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
-                    lastScanTime = lastScanTime + deltaTime
-                    if lastScanTime >= scanInterval then
-                        lastScanTime = 0
-                        scanGenerators()
-                    end
-                    
-                    for gen, data in pairs(generatorData) do
-                        if gen and gen.Parent then
-                            updateGeneratorESP(gen, data)
-                        else
-                            if data.billboard then data.billboard:Destroy() end
-                            if data.distanceBillboard then data.distanceBillboard:Destroy() end
-                            if data.highlight then data.highlight:Destroy() end
-                            generatorData[gen] = nil
-                        end
-                    end
-                end)
-                
-                -- 存储连接以便之后断开
-                generatorData.connections = {
-                    main = mainConnection,
-                    heartbeat = heartbeatConnection
-                }
-            else
-                -- 关闭功能时的清理逻辑
-                if generatorData.connections then
-                    for _, connection in pairs(generatorData.connections) do
-                        if connection then
-                            connection:Disconnect()
-                        end
-                    end
-                end
-                
-                for gen, data in pairs(generatorData) do
-                    if type(data) == "table" then
+                if gen:FindFirstChild("Progress") then
+                    local progress = gen.Progress.Value
+                    if progress >= 99 then
                         if data.billboard then data.billboard:Destroy() end
                         if data.distanceBillboard then data.distanceBillboard:Destroy() end
                         if data.highlight then data.highlight:Destroy() end
+                        generatorData[gen] = nil
+                        return
+                    end
+                    
+                    if data.textLabel then
+                        data.textLabel.Text = string.format("电机进度: %d%%", progress)
+                    end
+                    
+                    if humanoidRootPart and data.distanceLabel then
+                        local distance = (gen.Main.Position - humanoidRootPart.Position).Magnitude
+                        data.distanceLabel.Text = string.format("距离: %d米", math.floor(distance))
+                        
+                        local distanceRatio = math.clamp(
+                            (distance - distanceSettings.MinDistance) / 
+                            (distanceSettings.MaxDistance - distanceSettings.MinDistance),
+                            0, 1
+                        )
+                        
+                        local scale = distanceSettings.MinScale + 
+                            distanceRatio * (distanceSettings.MaxScale - distanceSettings.MinScale)
+                        
+                        local textSize = distanceSettings.MinTextSize + 
+                            distanceRatio * (distanceSettings.MaxTextSize - distanceSettings.MinTextSize)
+                        
+                        if data.billboard then data.billboard.Size = UDim2.new(4 * scale, 0, 1 * scale, 0) end
+                        if data.distanceBillboard then data.distanceBillboard.Size = UDim2.new(4 * scale, 0, 1 * scale, 0) end
+                        if data.textLabel then data.textLabel.TextSize = textSize end
+                        if data.distanceLabel then data.distanceLabel.TextSize = textSize end
+                        
+                        local transparency = math.clamp((distance - 50) / 100, 0, 0.4)
+                        if data.textLabel then data.textLabel.TextTransparency = transparency end
+                        if data.distanceLabel then data.distanceLabel.TextTransparency = transparency end
+                        if data.highlight then data.highlight.FillTransparency = 0.85 + (transparency * 0.5) end
                     end
                 end
-                generatorData = {}
+            end
+            
+            local function createGeneratorESP(gen)
+                if not gen or not gen:FindFirstChild("Main") or generatorData[gen] then return end
+                
+                local billboard = Instance.new("BillboardGui")
+                billboard.Name = "GeneratorESP"
+                billboard.Size = UDim2.new(4, 0, 1, 0)
+                billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+                billboard.Adornee = gen.Main
+                billboard.Parent = gen.Main
+                billboard.AlwaysOnTop = true
+                
+                local textLabel = Instance.new("TextLabel")
+                textLabel.Size = UDim2.new(1, 0, 0.5, 0)
+                textLabel.BackgroundTransparency = 1
+                textLabel.TextScaled = false
+                textLabel.Text = "电机加载中..."
+                textLabel.TextColor3 = Color3.fromRGB(0, 255, 255)
+                textLabel.Font = Enum.Font.Arcade
+                textLabel.TextStrokeTransparency = 0
+                textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                textLabel.TextSize = 8
+                textLabel.Parent = billboard
+                
+                local distanceBillboard = Instance.new("BillboardGui")
+                distanceBillboard.Name = "GeneratorDistanceESP"
+                distanceBillboard.Size = UDim2.new(4, 0, 1, 0)
+                distanceBillboard.StudsOffset = Vector3.new(0, 3.5, 0)
+                distanceBillboard.Adornee = gen.Main
+                distanceBillboard.Parent = gen.Main
+                distanceBillboard.AlwaysOnTop = true
+                
+                local distanceLabel = Instance.new("TextLabel")
+                distanceLabel.Size = UDim2.new(1, 0, 0.5, 0)
+                distanceLabel.BackgroundTransparency = 1
+                distanceLabel.TextScaled = false
+                distanceLabel.Text = "计算距离中..."
+                distanceLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+                distanceLabel.Font = Enum.Font.Arcade
+                distanceLabel.TextStrokeTransparency = 0
+                distanceLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                distanceLabel.TextSize = 8
+                distanceLabel.Parent = distanceBillboard
+                
+                local highlight = Instance.new("Highlight")
+                highlight.Name = "GeneratorHighlight"
+                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                highlight.Enabled = true
+                highlight.OutlineColor = Color3.fromRGB(0, 255, 255)
+                highlight.FillColor = Color3.fromRGB(0, 255, 255)
+                highlight.FillTransparency = 0.9
+                highlight.OutlineTransparency = 0
+                highlight.Parent = gen
+                
+                generatorData[gen] = {
+                    billboard = billboard,
+                    distanceBillboard = distanceBillboard,
+                    textLabel = textLabel,
+                    distanceLabel = distanceLabel,
+                    highlight = highlight
+                }
+                
+                gen.Destroying:Connect(function()
+                    if generatorData[gen] then
+                        if generatorData[gen].billboard then generatorData[gen].billboard:Destroy() end
+                        if generatorData[gen].distanceBillboard then generatorData[gen].distanceBillboard:Destroy() end
+                        if generatorData[gen].highlight then generatorData[gen].highlight:Destroy() end
+                        generatorData[gen] = nil
+                    end
+                end)
+            end
+            
+            local function scanGenerators()
+                for _, gen in pairs(workspace:GetDescendants()) do
+                    if gen:IsA("Model") and gen:FindFirstChild("Main") and gen.Name == "Generator" then
+                        createGeneratorESP(gen)
+                    end
+                end
+            end
+            
+            local mainConnection = workspace.DescendantAdded:Connect(function(v)
+                if v:IsA("Model") and v:FindFirstChild("Main") and v.Name == "Generator" then
+                    createGeneratorESP(v)
+                end
+            end)
+            
+            local heartbeatConnection = game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
+                lastScanTime = lastScanTime + deltaTime
+                if lastScanTime >= scanInterval then
+                    lastScanTime = 0
+                    scanGenerators()
+                end
+                
+                for gen, data in pairs(generatorData) do
+                    if gen and gen.Parent then
+                        updateGeneratorESP(gen, data)
+                    else
+                        if data.billboard then data.billboard:Destroy() end
+                        if data.distanceBillboard then data.distanceBillboard:Destroy() end
+                        if data.highlight then data.highlight:Destroy() end
+                        generatorData[gen] = nil
+                    end
+                end
+            end)
+            
+            -- 存储连接以便之后断开
+            generatorData.connections = {
+                main = mainConnection,
+                heartbeat = heartbeatConnection
+            }
+        else
+            -- 关闭功能时的清理逻辑
+            if generatorData.connections then
+                for _, connection in pairs(generatorData.connections) do
+                    if connection then
+                        connection:Disconnect()
+                    end
+                end
+            end
+            
+            for gen, data in pairs(generatorData) do
+                if type(data) == "table" then
+                    if data.billboard then data.billboard:Destroy() end
+                    if data.distanceBillboard then data.distanceBillboard:Destroy() end
+                    if data.highlight then data.highlight:Destroy() end
+                end
             end
         end
-    })
+    end
+})
 
     local Tab6 = Window:Tab({
         Title = "美化与动作",
