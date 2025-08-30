@@ -10,6 +10,31 @@ local StaminaSettings = {
     InfiniteGain = 9999
 }
 
+local function findFirstChildRecursive(parent, name)
+    if parent.Name == name then
+        return parent
+    end
+    
+    for _, child in ipairs(parent:GetChildren()) do
+        local result = findFirstChildRecursive(child, name)
+        if result then
+            return result
+        end
+    end
+    
+    return nil
+end
+
+function createMainWindow()
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+    local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local hum = Character:WaitForChild("HumanoidRootPart")
+    local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+    local teleportMedkitThread, teleportColaThread, medkitThread, colaThread
+    local autoTeleportMedkitEnabled, autoTeleportColaEnabled, autoMedkitEnabled, autoColaEnabled
+
 WindUI:Popup({
     Title = "欢迎使用XP KFI脚本",
     Icon = "sparkles",
