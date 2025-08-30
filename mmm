@@ -113,7 +113,7 @@ function createMainWindow()
         StrokeThickness = 3,  -- 增加边框厚度
     })
     
-        local MainTab = Window:Tab({
+    local MainTab = Window:Tab({
         Title = "主页",
         Icon = "zap",
         Locked = false,
@@ -152,12 +152,20 @@ function createMainWindow()
     })
 
     local function GetSprintingModule()
-        if ReplicatedStorage:FindFirstChild("Systems") and
-           ReplicatedStorage.Systems:FindFirstChild("Character") and
-           ReplicatedStorage.Systems.Character:FindFirstChild("Game") and
-           ReplicatedStorage.Systems.Character.Game:FindFirstChild("Sprinting") then
-            return require(ReplicatedStorage.Systems.Character.Game.Sprinting)
+        -- 尝试多种可能的路径
+        local possiblePaths = {
+            ReplicatedStorage:FindFirstChild("Systems") and ReplicatedStorage.Systems:FindFirstChild("Character") and ReplicatedStorage.Systems.Character:FindFirstChild("Game") and ReplicatedStorage.Systems.Character.Game:FindFirstChild("Sprinting"),
+            ReplicatedStorage:FindFirstChild("Modules") and ReplicatedStorage.Modules:FindFirstChild("Character") and ReplicatedStorage.Modules.Character:FindFirstChild("Sprinting"),
+            ReplicatedStorage:FindFirstChild("Sprinting")
+        }
+        
+        for _, module in ipairs(possiblePaths) do
+            if module then
+                return require(module)
+            end
         end
+        
+        warn("无法找到体力模块!")
         return nil
     end
 
@@ -750,24 +758,26 @@ function createMainWindow()
     }
 
     -- 距离显示功能
+    local distanceUnderFeetLabels = {}
+    local distanceUnderFeetConnection
+    local characterRemovedConnection
+
     local function updateDistanceDisplay()
         -- 先关闭现有连接
-        if getgenv().distanceUnderFeetConnection then
-            getgenv().distanceUnderFeetConnection:Disconnect()
+        if distanceUnderFeetConnection then
+            distanceUnderFeetConnection:Disconnect()
         end
         
-        if getgenv().characterRemovedConnection then
-            getgenv().characterRemovedConnection:Disconnect()
+        if characterRemovedConnection then
+            characterRemovedConnection:Disconnect()
         end
         
         -- 如果两个都关闭则完全禁用
         if not DistanceSettings.ShowSurvivors and not DistanceSettings.ShowKillers then
-            if getgenv().distanceUnderFeetLabels then
-                for _, data in pairs(getgenv().distanceUnderFeetLabels) do
-                    pcall(function() data.label:Remove() end)
-                end
-                getgenv().distanceUnderFeetLabels = nil
+            for _, data in pairs(distanceUnderFeetLabels) do
+                pcall(function() data.label:Remove() end)
             end
+            distanceUnderFeetLabels = {}
             return
         end
         
@@ -777,11 +787,8 @@ function createMainWindow()
         local localPlayer = players.LocalPlayer
         local camera = workspace.CurrentCamera
         
-        -- 存储所有距离标签
-        getgenv().distanceUnderFeetLabels = getgenv().distanceUnderFeetLabels or {}
-        
         -- 主循环
-        getgenv().distanceUnderFeetConnection = runService.RenderStepped:Connect(function()
+        distanceUnderFeetConnection = runService.RenderStepped:Connect(function()
             local localChar = localPlayer.Character
             if not localChar or not localChar:FindFirstChild("HumanoidRootPart") then return end
             
@@ -795,19 +802,19 @@ function createMainWindow()
                         if survivor:IsA("Model") and survivor ~= localChar then
                             local hrp = survivor:FindFirstChild("HumanoidRootPart")
                             if hrp then
-                                if not getgenv().distanceUnderFeetLabels[survivor] then
-                                    getgenv().distanceUnderFeetLabels[survivor] = {
+                                if not distanceUnderFeetLabels[survivor] then
+                                    distanceUnderFeetLabels[survivor] = {
                                         label = Drawing.new("Text"),
                                         type = "Survivor"
                                     }
-                                    local label = getgenv().distanceUnderFeetLabels[survivor].label
+                                    local label = distanceUnderFeetLabels[survivor].label
                                     label.Size = DistanceSettings.TextSize
                                     label.Center = true
                                     label.Outline = true
                                     label.Font = 2
                                 end
                                 
-                                local data = getgenv().distanceUnderFeetLabels[survivor]
+                                local data = distanceUnderFeetLabels[survivor]
                                 local distance = math.floor((hrp.Position - localPos).Magnitude)
                                 local screenPos, onScreen = camera:WorldToViewportPoint(hrp.Position - Vector3.new(0, 3, 0))
                                 
@@ -825,7 +832,7 @@ function createMainWindow()
                 end
             else
                 -- 隐藏所有幸存者标签
-                for model, data in pairs(getgenv().distanceUnderFeetLabels or {}) do
+                for model, data in pairs(distanceUnderFeetLabels) do
                     if data.type == "Survivor" then
                         data.label.Visible = false
                     end
@@ -840,19 +847,19 @@ function createMainWindow()
                         if killer:IsA("Model") then
                             local hrp = killer:FindFirstChild("HumanoidRootPart")
                             if hrp then
-                                if not getgenv().distanceUnderFeetLabels[killer] then
-                                    getgenv().distanceUnderFeetLabels[killer] = {
+                                if not distanceUnderFeetLabels[killer] then
+                                    distanceUnderFeetLabels[killer] = {
                                         label = Drawing.new("Text"),
                                         type = "Killer"
                                     }
-                                    local label = getgenv().distanceUnderFeetLabels[killer].label
+                                    local label = distanceUnderFeetLabels[killer].label
                                     label.Size = DistanceSettings.TextSize
                                     label.Center = true
                                     label.Outline = true
                                     label.Font = 2
                                 end
                                 
-                                local data = getgenv().distanceUnderFeetLabels[killer]
+                                local data = distanceUnderFeetLabels[killer]
                                 local distance = math.floor((hrp.Position - localPos).Magnitude)
                                 local screenPos, onScreen = camera:WorldToViewportPoint(hrp.Position - Vector3.new(0, 3, 0))
                                 
@@ -870,7 +877,7 @@ function createMainWindow()
                 end
             else
                 -- 隐藏所有杀手标签
-                for model, data in pairs(getgenv().distanceUnderFeetLabels or {}) do
+                for model, data in pairs(distanceUnderFeetLabels) do
                     if data.type == "Killer" then
                         data.label.Visible = false
                     end
@@ -879,10 +886,10 @@ function createMainWindow()
         end)
         
         -- 监听角色移除
-        getgenv().characterRemovedConnection = workspace.Players.DescendantRemoving:Connect(function(descendant)
-            if descendant:IsA("Model") and getgenv().distanceUnderFeetLabels and getgenv().distanceUnderFeetLabels[descendant] then
-                getgenv().distanceUnderFeetLabels[descendant].label:Remove()
-                getgenv().distanceUnderFeetLabels[descendant] = nil
+        characterRemovedConnection = workspace.Players.DescendantRemoving:Connect(function(descendant)
+            if descendant:IsA("Model") and distanceUnderFeetLabels[descendant] then
+                distanceUnderFeetLabels[descendant].label:Remove()
+                distanceUnderFeetLabels[descendant] = nil
             end
         end)
     end
@@ -893,7 +900,7 @@ function createMainWindow()
         Locked = false,
         Callback = function(enabled)
             DistanceSettings.ShowSurvivors = enabled
-            if getgenv().distanceUnderFeetConnection then
+            if distanceUnderFeetConnection then
                 updateDistanceDisplay()
             end
         end
@@ -905,7 +912,7 @@ function createMainWindow()
         Locked = false,
         Callback = function(enabled)
             DistanceSettings.ShowKillers = enabled
-            if getgenv().distanceUnderFeetConnection then
+            if distanceUnderFeetConnection then
                 updateDistanceDisplay()
             end
         end
@@ -1053,14 +1060,14 @@ function createMainWindow()
         end
     })
 
+    -- 发电机ESP数据
+    local generatorData = {}
+
     local Toggle13 = Tab5:Toggle({
         Title = "绘制发电机",
         Desc = "FIN",
         Locked = false,
         Callback = function(enabled)
-            -- 将 generatorData 移到回调函数内部，确保每次开启都是独立的作用域
-            local generatorData = {}
-            
             if enabled then
                 local scanInterval = 0.5 
                 local lastScanTime = 0
@@ -1249,6 +1256,7 @@ function createMainWindow()
                         if data.highlight then data.highlight:Destroy() end
                     end
                 end
+                generatorData = {}
             end
         end
     })
@@ -1293,23 +1301,29 @@ function createMainWindow()
             
             -- 检查特效路径是否存在
             local replicatedStorage = game:GetService("ReplicatedStorage")
-            if replicatedStorage:FindFirstChild("Assets") and
-               replicatedStorage.Assets:FindFirstChild("Emotes") and
-               replicatedStorage.Assets.Emotes:FindFirstChild("HakariDance") and
-               replicatedStorage.Assets.Emotes.HakariDance:FindFirstChild("HakariBeamEffect") then
-                
-                local effect = replicatedStorage.Assets.Emotes.HakariDance.HakariBeamEffect:Clone()
-                effect.Name = "PlayerEmoteVFX"
-                effect.CFrame = rootPart.CFrame * CFrame.new(0, -1, -0.3)
-                
-                -- 确保有WeldConstraint
-                if effect:FindFirstChildOfClass("WeldConstraint") then
-                    effect.WeldConstraint.Part0 = rootPart
-                    effect.WeldConstraint.Part1 = effect
+            local effect
+            if replicatedStorage:FindFirstChild("Assets") then
+                local assets = replicatedStorage.Assets
+                if assets:FindFirstChild("Emotes") then
+                    local emotes = assets.Emotes
+                    if emotes:FindFirstChild("HakariDance") then
+                        local hakariDance = emotes.HakariDance
+                        if hakariDance:FindFirstChild("HakariBeamEffect") then
+                            effect = hakariDance.HakariBeamEffect:Clone()
+                            effect.Name = "PlayerEmoteVFX"
+                            effect.CFrame = rootPart.CFrame * CFrame.new(0, -1, -0.3)
+                            
+                            -- 确保有WeldConstraint
+                            if effect:FindFirstChildOfClass("WeldConstraint") then
+                                effect.WeldConstraint.Part0 = rootPart
+                                effect.WeldConstraint.Part1 = effect
+                            end
+                            
+                            effect.Parent = char
+                            effect.CanCollide = false
+                        end
+                    end
                 end
-                
-                effect.Parent = char
-                effect.CanCollide = false
             end
             
             -- 发送网络事件
@@ -1330,6 +1344,13 @@ function createMainWindow()
                 humanoid.JumpPower = originalJumpPower
                 if bodyVelocity and bodyVelocity.Parent then
                     bodyVelocity:Destroy()
+                end
+                if sound and sound.Parent then
+                    sound:Stop()
+                    sound:Destroy()
+                end
+                if effect and effect.Parent then
+                    effect:Destroy()
                 end
             end)
         else
@@ -1379,207 +1400,95 @@ function createMainWindow()
         end
     })
 
-local Toggle16 = Tab6:Toggle({
+    local Toggle16 = Tab6:Toggle({
         Title = "谢德美化",
         Desc = "XP",
         Locked = false,
         Callback = function()
-local player = game.Players.LocalPlayer  
-local character = player.Character or player.CharacterAdded:Wait()
+            local player = game.Players.LocalPlayer  
+            local character = player.Character or player.CharacterAdded:Wait()
 
-local shirt = character:FindFirstChildOfClass("Shirt") or Instance.new("Shirt", character)
-shirt.ShirtTemplate = "http://www.roblox.com/asset/?id=14248399102"
+            local shirt = character:FindFirstChildOfClass("Shirt") or Instance.new("Shirt", character)
+            shirt.ShirtTemplate = "http://www.roblox.com/asset/?id=14248399102"
 
-local pants = character:FindFirstChildOfClass("Pants") or Instance.new("Pants", character)
-pants.PantsTemplate = "http://www.roblox.com/asset/?id=14248410313"
+            local pants = character:FindFirstChildOfClass("Pants") or Instance.new("Pants", character)
+            pants.PantsTemplate = "http://www.roblox.com/asset/?id=14248410313"
 
-local head = character:FindFirstChild("Head")
-if head then
-    local face = head:FindFirstChild("face")
-    if face then
-        face:Destroy()
-    end
-    local function addAccessory(name, meshId, textureId, parentPartName, handleSize, position, rotation, customWeldC0, customWeldC1, meshScale, meshOffset)
-        local accessory = Instance.new("Accessory")
-        accessory.Name = name
-        local handle = Instance.new("Part")
-        handle.Name = "Handle"
-        handle.Size = Vector3.new(unpack(handleSize))
-        handle.CanCollide = false
-        handle.Anchored = false
-        handle.Parent = accessory
-        local mesh = Instance.new("SpecialMesh", handle)
-        mesh.MeshId = meshId
-        if textureId ~= "" then
-            mesh.TextureId = textureId
+            local head = character:FindFirstChild("Head")
+            if head then
+                local face = head:FindFirstChild("face")
+                if face then
+                    face:Destroy()
+                end
+            end
+            
+            local function addAccessory(name, meshId, textureId, parentPartName, handleSize, position, rotation, customWeldC0, customWeldC1, meshScale, meshOffset)
+                local accessory = Instance.new("Accessory")
+                accessory.Name = name
+                local handle = Instance.new("Part")
+                handle.Name = "Handle"
+                handle.Size = Vector3.new(unpack(handleSize))
+                handle.CanCollide = false
+                handle.Anchored = false
+                handle.Parent = accessory
+                local mesh = Instance.new("SpecialMesh", handle)
+                mesh.MeshId = meshId
+                if textureId ~= "" then
+                    mesh.TextureId = textureId
+                end
+                if meshScale then
+                    mesh.Scale = Vector3.new(unpack(meshScale))
+                else
+                    mesh.Scale = Vector3.new(0.65, 0.65, 0.65)
+                end
+                if meshOffset then
+                    mesh.Offset = Vector3.new(unpack(meshOffset))
+                else
+                    mesh.Offset = Vector3.new(0, -0.55, 0)
+                end
+                local targetPart = character:FindFirstChild(parentPartName)
+                if not targetPart then
+                    warn("Target part '" .. parentPartName .. "' not found in character!")
+                    return
+                end
+                local weld = Instance.new("Weld")
+                weld.Part0 = targetPart
+                weld.Part1 = handle
+                if customWeldC0 and customWeldC1 then
+                    weld.C0 = CFrame.new(unpack(customWeldC0))
+                    weld.C1 = CFrame.new(unpack(customWeldC1))
+                else
+                    weld.C0 = CFrame.new(unpack(position)) * CFrame.Angles(math.rad(rotation[1]), math.rad(rotation[2]), math.rad(rotation[3]))
+                end
+                weld.Parent = handle
+                accessory.Parent = character
+            end
+
+            addAccessory("Face", "rbxassetid://110562243236643", "rbxassetid://92220809340639", "Head", {1,1,1}, {0,0.55,0}, {0,180,0}, nil, nil, {1,1,1}, nil)
+            addAccessory("Blade", "rbxassetid://18116147526", "rbxassetid://18955600612", "Right Arm", {1, 1, 1}, {-0.5, -1.1, -3.3}, {180, -100, 0}, nil, nil, {1, 1, 1}, nil)
+            addAccessory("Helmet", "rbxassetid://13252936277", "rbxassetid://13252949489", "Head", {1, 1, 1}, {0, 0.8, 0}, {0, 0, 0}, nil, nil, {1.1, 1, 1}, nil)
+            addAccessory("Scarf", "rbxassetid://7459110498", "rbxassetid://7543326394", "Torso", {1, 1, 1}, {0, 1.4, 0}, {0, 0, 0}, nil, nil, {1, 1, 1}, nil)
+            addAccessory("LeftSleeve", "rbxassetid://14886992040", "rbxassetid://14887049482", "Left Arm", {1, 1, 1}, {0, 1.2, 0}, {0, 0, 0}, nil, nil, {0.15, 0.15, 0.15}, nil)
+            addAccessory("Hair", "rbxassetid://7666931987", "rbxassetid://7066058408", "Head", {1, 1, 1}, {0, -1.3, 1.3}, {0, 0, 0}, nil, nil, {1, 1, 1}, nil)
+            addAccessory("RightSleeve", "rbxassetid://7265541707", "rbxassetid://7265983163", "Right Arm", {1, 1, 1}, {0.25, 1.5, 0}, {0, 0, 0}, nil, nil, {1, 1, 1}, nil)
+
+            local shedletsky = workspace.Players.Survivors:FindFirstChild("Shedletsky")
+            if shedletsky then
+                local expressionHolder = shedletsky:FindFirstChild("ExpressionHolder")
+                if expressionHolder then
+                    expressionHolder:Destroy()
+                end
+                local shedHair = shedletsky:FindFirstChild("ShedHair")
+                if shedHair then
+                    shedHair:Destroy()
+                end
+                local sword = shedletsky:FindFirstChild("Sword")
+                if sword then
+                    sword:Destroy()
+                end
+            end
         end
-        if meshScale then
-            mesh.Scale = Vector3.new(unpack(meshScale))
-        else
-            mesh.Scale = Vector3.new(0.65, 0.65, 0.65)
-        end
-        if meshOffset then
-            mesh.Offset = Vector3.new(unpack(meshOffset))
-        else
-            mesh.Offset = Vector3.new(0, -0.55, 0)
-        end
-        local targetPart = character:FindFirstChild(parentPartName)
-        if not targetPart then
-            warn("Target part '" .. parentPartName .. "' not found in character!")
-            return
-        end
-        local weld = Instance.new("Weld")
-        weld.Part0 = targetPart
-        weld.Part1 = handle
-        if customWeldC0 and customWeldC1 then
-            weld.C0 = CFrame.new(unpack(customWeldC0))
-            weld.C1 = CFrame.new(unpack(customWeldC1))
-        else
-            weld.C0 = CFrame.new(unpack(position)) * CFrame.Angles(math.rad(rotation[1]), math.rad(rotation[2]), math.rad(rotation[3]))
-        end
-        weld.Parent = handle
-        accessory.Parent = character
-    end
-    addAccessory("Face", "rbxassetid://110562243236643", "rbxassetid://92220809340639", "Head", {1,1,1}, {0,0.55,0}, {0,180,0}, nil, nil, {1,1,1}, nil)
-end
-
-local function addAccessory(name, meshId, textureId, parentPartName, handleSize, position, rotation, customWeldC0, customWeldC1, meshScale, meshOffset)
-    local accessory = Instance.new("Accessory")
-    accessory.Name = name
-    local handle = Instance.new("Part")
-    handle.Name = "Handle"
-    handle.Size = Vector3.new(unpack(handleSize))
-    handle.CanCollide = false
-    handle.Anchored = false
-    handle.Parent = accessory
-    local mesh = Instance.new("SpecialMesh", handle)
-    mesh.MeshId = meshId
-    if textureId ~= "" then
-        mesh.TextureId = textureId
-    end
-    if meshScale then
-        mesh.Scale = Vector3.new(unpack(meshScale))
-    else
-        mesh.Scale = Vector3.new(0.65, 0.65, 0.65)
-    end
-    if meshOffset then
-        mesh.Offset = Vector3.new(unpack(meshOffset))
-    else
-        mesh.Offset = Vector3.new(0, -0.55, 0)
-    end
-    local targetPart = character:FindFirstChild(parentPartName)
-    if not targetPart then
-        warn("Target part '" .. parentPartName .. "' not found in character!")
-        return
-    end
-    local weld = Instance.new("Weld")
-    weld.Part0 = targetPart
-    weld.Part1 = handle
-    if customWeldC0 and customWeldC1 then
-        weld.C0 = CFrame.new(unpack(customWeldC0))
-        weld.C1 = CFrame.new(unpack(customWeldC1))
-    else
-        weld.C0 = CFrame.new(unpack(position)) * CFrame.Angles(math.rad(rotation[1]), math.rad(rotation[2]), math.rad(rotation[3]))
-    end
-    weld.Parent = handle
-    accessory.Parent = character
-end
-
-addAccessory(
-    "Blade",
-    "rbxassetid://18116147526",
-    "rbxassetid://18955600612",
-    "Right Arm",
-    {1, 1, 1},
-    {-0.5, -1.1, -3.3},
-    {180, -100, 0},
-    nil, nil,
-    {1, 1, 1},
-    nil
-)
-
-addAccessory(
-    "Helmet",
-    "rbxassetid://13252936277",
-    "rbxassetid://13252949489",
-    "Head",
-    {1, 1, 1},
-    {0, 0.8, 0},
-    {0, 0, 0},
-    nil, nil,
-    {1.1, 1, 1},
-    nil
-)
-
-addAccessory(
-    "Scarf",
-    "rbxassetid://7459110498",
-    "rbxassetid://7543326394",
-    "Torso",
-    {1, 1, 1},
-    {0, 1.4, 0},
-    {0, 0, 0},
-    nil, nil,
-    {1, 1, 1},
-    nil
-)
-
-addAccessory(
-    "LeftSleeve",
-    "rbxassetid://14886992040",
-    "rbxassetid://14887049482",
-    "Left Arm",
-    {1, 1, 1},
-    {0, 1.2, 0},
-    {0, 0, 0},
-    nil, nil,
-    {0.15, 0.15, 0.15},
-    nil
-)
-
-addAccessory(
-    "Hair",
-    "rbxassetid://7666931987",
-    "rbxassetid://7066058408",
-    "Head",
-    {1, 1, 1},
-    {0, -1.3, 1.3},
-    {0, 0, 0},
-    nil, nil,
-    {1, 1, 1},
-    nil
-)
-
-addAccessory(
-    "RightSleeve",
-    "rbxassetid://7265541707",
-    "rbxassetid://7265983163",
-    "Right Arm",
-    {1, 1, 1},
-    {0.25, 1.5, 0},
-    {0, 0, 0},
-    nil, nil,
-    {1, 1, 1},
-    nil
-)
-
-local shedletsky = workspace.Players.Survivors:FindFirstChild("Shedletsky")
-if shedletsky then
-    local expressionHolder = shedletsky:FindFirstChild("ExpressionHolder")
-    if expressionHolder then
-        expressionHolder:Destroy()
-    end
-    local shedHair = shedletsky:FindFirstChild("ShedHair")
-    if shedHair then
-        shedHair:Destroy()
-    end
-    local sword = shedletsky:FindFirstChild("Sword")
-    if sword then
-        sword:Destroy()
-    end
-end
-  end
-})
+    })
 
     local Tab7 = Window:Tab({
         Title = "访客假防御",
