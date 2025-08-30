@@ -957,7 +957,7 @@ function createMainWindow()
         end)
     end
 
-    local Toggle8 = Tab5:Toggle({
+    local Toggle9 = Tab5:Toggle({
         Title = "绘制幸存者距离",
         Desc = "FIN",
         Locked = false,
@@ -969,7 +969,7 @@ function createMainWindow()
         end
     })
 
-    local Toggle9 = Tab5:Toggle({
+    local Toggle10 = Tab5:Toggle({
         Title = "绘制杀手距离",
         Desc = "FIN",
         Locked = false,
@@ -1083,7 +1083,7 @@ function createMainWindow()
         end
     end
 
-    local Toggle10 = Tab5:Toggle({
+    local Toggle11 = Tab5:Toggle({
         Title = "启动绘制",
         Desc = "FIN",
         Locked = false,
@@ -1105,7 +1105,7 @@ function createMainWindow()
         end
     })
 
-    local Toggle11 = Tab5:Toggle({
+    local Toggle13 = Tab5:Toggle({
         Title = "绘制幸存者",
         Desc = "FIN",
         Locked = false,
@@ -1114,7 +1114,7 @@ function createMainWindow()
         end
     })
 
-    local Toggle12 = Tab5:Toggle({
+    local Toggle14 = Tab5:Toggle({
         Title = "绘制杀手", 
         Desc = "FIN",
         Locked = false,
@@ -1445,7 +1445,7 @@ function createMainWindow()
         end
     end
 
-    local Toggle14 = Tab6:Toggle({
+    local Toggle15 = Tab6:Toggle({
         Title = "VIP动作",
         Desc = "新版",
         Locked = false,
@@ -1454,7 +1454,7 @@ function createMainWindow()
         end
     })
 
-    local Toggle15 = Tab6:Toggle({
+    local Toggle16 = Tab6:Toggle({
         Title = "VIP动作",
         Desc = "旧版",
         Locked = false,
