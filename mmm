@@ -450,6 +450,8 @@ function createMainWindow()
                     end
                 end)
             else
+                WindUI:Notify("已关闭一键修理功能", nil, 4590657391)
+            end
         end
     })
 
