@@ -1254,7 +1254,7 @@ function createMainWindow()
     })
 
     local Tab6 = Window:Tab({
-        Title = "VIP动作🤑",
+        Title = "美化与动作",
         Icon = "drama",
         Locked = false,
     })
@@ -1378,6 +1378,208 @@ function createMainWindow()
             setupVIPAction(state, "rbxassetid://87166578676888")
         end
     })
+
+local Toggle16 = Tab6:Toggle({
+        Title = "谢德美化",
+        Desc = "XP",
+        Locked = false,
+        Callback = function()
+local player = game.Players.LocalPlayer  
+local character = player.Character or player.CharacterAdded:Wait()
+
+local shirt = character:FindFirstChildOfClass("Shirt") or Instance.new("Shirt", character)
+shirt.ShirtTemplate = "http://www.roblox.com/asset/?id=14248399102"
+
+local pants = character:FindFirstChildOfClass("Pants") or Instance.new("Pants", character)
+pants.PantsTemplate = "http://www.roblox.com/asset/?id=14248410313"
+
+local head = character:FindFirstChild("Head")
+if head then
+    local face = head:FindFirstChild("face")
+    if face then
+        face:Destroy()
+    end
+    local function addAccessory(name, meshId, textureId, parentPartName, handleSize, position, rotation, customWeldC0, customWeldC1, meshScale, meshOffset)
+        local accessory = Instance.new("Accessory")
+        accessory.Name = name
+        local handle = Instance.new("Part")
+        handle.Name = "Handle"
+        handle.Size = Vector3.new(unpack(handleSize))
+        handle.CanCollide = false
+        handle.Anchored = false
+        handle.Parent = accessory
+        local mesh = Instance.new("SpecialMesh", handle)
+        mesh.MeshId = meshId
+        if textureId ~= "" then
+            mesh.TextureId = textureId
+        end
+        if meshScale then
+            mesh.Scale = Vector3.new(unpack(meshScale))
+        else
+            mesh.Scale = Vector3.new(0.65, 0.65, 0.65)
+        end
+        if meshOffset then
+            mesh.Offset = Vector3.new(unpack(meshOffset))
+        else
+            mesh.Offset = Vector3.new(0, -0.55, 0)
+        end
+        local targetPart = character:FindFirstChild(parentPartName)
+        if not targetPart then
+            warn("Target part '" .. parentPartName .. "' not found in character!")
+            return
+        end
+        local weld = Instance.new("Weld")
+        weld.Part0 = targetPart
+        weld.Part1 = handle
+        if customWeldC0 and customWeldC1 then
+            weld.C0 = CFrame.new(unpack(customWeldC0))
+            weld.C1 = CFrame.new(unpack(customWeldC1))
+        else
+            weld.C0 = CFrame.new(unpack(position)) * CFrame.Angles(math.rad(rotation[1]), math.rad(rotation[2]), math.rad(rotation[3]))
+        end
+        weld.Parent = handle
+        accessory.Parent = character
+    end
+    addAccessory("Face", "rbxassetid://110562243236643", "rbxassetid://92220809340639", "Head", {1,1,1}, {0,0.55,0}, {0,180,0}, nil, nil, {1,1,1}, nil)
+end
+
+local function addAccessory(name, meshId, textureId, parentPartName, handleSize, position, rotation, customWeldC0, customWeldC1, meshScale, meshOffset)
+    local accessory = Instance.new("Accessory")
+    accessory.Name = name
+    local handle = Instance.new("Part")
+    handle.Name = "Handle"
+    handle.Size = Vector3.new(unpack(handleSize))
+    handle.CanCollide = false
+    handle.Anchored = false
+    handle.Parent = accessory
+    local mesh = Instance.new("SpecialMesh", handle)
+    mesh.MeshId = meshId
+    if textureId ~= "" then
+        mesh.TextureId = textureId
+    end
+    if meshScale then
+        mesh.Scale = Vector3.new(unpack(meshScale))
+    else
+        mesh.Scale = Vector3.new(0.65, 0.65, 0.65)
+    end
+    if meshOffset then
+        mesh.Offset = Vector3.new(unpack(meshOffset))
+    else
+        mesh.Offset = Vector3.new(0, -0.55, 0)
+    end
+    local targetPart = character:FindFirstChild(parentPartName)
+    if not targetPart then
+        warn("Target part '" .. parentPartName .. "' not found in character!")
+        return
+    end
+    local weld = Instance.new("Weld")
+    weld.Part0 = targetPart
+    weld.Part1 = handle
+    if customWeldC0 and customWeldC1 then
+        weld.C0 = CFrame.new(unpack(customWeldC0))
+        weld.C1 = CFrame.new(unpack(customWeldC1))
+    else
+        weld.C0 = CFrame.new(unpack(position)) * CFrame.Angles(math.rad(rotation[1]), math.rad(rotation[2]), math.rad(rotation[3]))
+    end
+    weld.Parent = handle
+    accessory.Parent = character
+end
+
+addAccessory(
+    "Blade",
+    "rbxassetid://18116147526",
+    "rbxassetid://18955600612",
+    "Right Arm",
+    {1, 1, 1},
+    {-0.5, -1.1, -3.3},
+    {180, -100, 0},
+    nil, nil,
+    {1, 1, 1},
+    nil
+)
+
+addAccessory(
+    "Helmet",
+    "rbxassetid://13252936277",
+    "rbxassetid://13252949489",
+    "Head",
+    {1, 1, 1},
+    {0, 0.8, 0},
+    {0, 0, 0},
+    nil, nil,
+    {1.1, 1, 1},
+    nil
+)
+
+addAccessory(
+    "Scarf",
+    "rbxassetid://7459110498",
+    "rbxassetid://7543326394",
+    "Torso",
+    {1, 1, 1},
+    {0, 1.4, 0},
+    {0, 0, 0},
+    nil, nil,
+    {1, 1, 1},
+    nil
+)
+
+addAccessory(
+    "LeftSleeve",
+    "rbxassetid://14886992040",
+    "rbxassetid://14887049482",
+    "Left Arm",
+    {1, 1, 1},
+    {0, 1.2, 0},
+    {0, 0, 0},
+    nil, nil,
+    {0.15, 0.15, 0.15},
+    nil
+)
+
+addAccessory(
+    "Hair",
+    "rbxassetid://7666931987",
+    "rbxassetid://7066058408",
+    "Head",
+    {1, 1, 1},
+    {0, -1.3, 1.3},
+    {0, 0, 0},
+    nil, nil,
+    {1, 1, 1},
+    nil
+)
+
+addAccessory(
+    "RightSleeve",
+    "rbxassetid://7265541707",
+    "rbxassetid://7265983163",
+    "Right Arm",
+    {1, 1, 1},
+    {0.25, 1.5, 0},
+    {0, 0, 0},
+    nil, nil,
+    {1, 1, 1},
+    nil
+)
+
+local shedletsky = workspace.Players.Survivors:FindFirstChild("Shedletsky")
+if shedletsky then
+    local expressionHolder = shedletsky:FindFirstChild("ExpressionHolder")
+    if expressionHolder then
+        expressionHolder:Destroy()
+    end
+    local shedHair = shedletsky:FindFirstChild("ShedHair")
+    if shedHair then
+        shedHair:Destroy()
+    end
+    local sword = shedletsky:FindFirstChild("Sword")
+    if sword then
+        sword:Destroy()
+    end
+end
+  end
+})
 
     local Tab7 = Window:Tab({
         Title = "访客假防御",
