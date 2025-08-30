@@ -80,7 +80,7 @@ function createMainWindow()
         Color = Color3.fromHex("#30ff6a")
     })
     Window:Tag({
-        Title = "付费版", -- 标签汉化
+        Title = "付费版", 
         Color = Color3.fromHex("#315dff")
     })
     local TimeTag = Window:Tag({
@@ -1400,9 +1400,9 @@ function createMainWindow()
         end
     })
 
-    local Toggle16 = Tab6:Toggle({
+    local Button = Tab6:Button({
         Title = "谢德美化",
-        Desc = "XP",
+        Desc = "级高",
         Locked = false,
         Callback = function()
             local player = game.Players.LocalPlayer  
