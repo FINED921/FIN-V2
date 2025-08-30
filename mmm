@@ -134,6 +134,21 @@ function createMainWindow()
         Locked = false,
     })
 
+loacl Slider = Tab:Slider({
+    Title = "移速",
+    Value = {
+        Min = 16,
+        Max = 400,
+        Default = 16,
+    },
+    Increment = 1,
+    Callback = function(value)
+        if game.Players.LocalPlayer.Character then
+            game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = value
+        end
+    end
+})
+
     local Toggle = Tab:Toggle({
         Title = "显示局内聊天框",
         Desc = "FIN",
