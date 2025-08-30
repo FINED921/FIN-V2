@@ -236,37 +236,46 @@ function createMainWindow()
         Desc = "FIN",
         Locked = false,
         Callback = function(state)
-            autoTeleportMedkitEnabled = state
-            
-            if autoTeleportMedkitEnabled then
-                teleportMedkitThread = task.spawn(function()
-                    while autoTeleportMedkitEnabled and task.wait(0.5) do
-                        local character = game.Players.LocalPlayer.Character
-                        if character and character:FindFirstChild("HumanoidRootPart") then
-                            local humanoidRootPart = character.HumanoidRootPart
-                            
-                            -- 使用递归查找
-                            local medkit = findFirstChildRecursive(workspace, "Medkit")
+        autoTeleportMedkitEnabled = state
+        
+        if autoTeleportMedkitEnabled then
+            teleportMedkitThread = task.spawn(function()
+                while autoTeleportMedkitEnabled and task.wait(0.5) do
+                  
+                    local character = game.Players.LocalPlayer.Character
+                    if character and character:FindFirstChild("HumanoidRootPart") then
+                        local humanoidRootPart = character.HumanoidRootPart
+                        
+                      
+                        local medkit = workspace:FindFirstChild("Map", true)
+                        if medkit then
+                            medkit = medkit:FindFirstChild("Ingame", true)
                             if medkit then
-                                local itemRoot = findFirstChildRecursive(medkit, "ItemRoot")
-                                if itemRoot then
-                                    itemRoot.CFrame = humanoidRootPart.CFrame + humanoidRootPart.CFrame.LookVector * 3
-                                    
-                                    local prompt = itemRoot:FindFirstChild("ProximityPrompt")
-                                    if prompt then
-                                        fireproximityprompt(prompt)
+                                medkit = medkit:FindFirstChild("Medkit", true)
+                                if medkit then
+                                    local itemRoot = medkit:FindFirstChild("ItemRoot", true)
+                                    if itemRoot then
+                                       
+                                        itemRoot.CFrame = humanoidRootPart.CFrame + humanoidRootPart.CFrame.LookVector * 3
+                                        
+                                       
+                                        local prompt = itemRoot:FindFirstChild("ProximityPrompt", true)
+                                        if prompt then
+                                            fireproximityprompt(prompt)
+                                        end
                                     end
                                 end
                             end
                         end
                     end
-                end)
-            elseif teleportMedkitThread then
-                task.cancel(teleportMedkitThread)
-                teleportMedkitThread = nil
-            end
+                end
+            end)
+        elseif teleportMedkitThread then
+            task.cancel(teleportMedkitThread)
+            teleportMedkitThread = nil
         end
-    })
+    end
+})
 
     local Toggle4 = Tab3:Toggle({
         Title = "可乐罐传送且获取",
