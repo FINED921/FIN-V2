@@ -134,9 +134,9 @@ function createMainWindow()
         Locked = false,
     })
 
-   loacl Slider = Tab:Slider({
-       Title = "移速",
-       Value = {
+   local Slider = Tab:Slider({
+    Title = "移速",
+    Value = {
         Min = 16,
         Max = 400,
         Default = 16,
